@@ -31,7 +31,7 @@ function findNode(nodes, sourcePath) {
   return undefined;
 }
 
-test('builds a recursive article tree and prunes non-content directories', (context) => {
+test('starts at public subfolders, recurses, and prunes non-content directories', (context) => {
   const projectRoot = mkdtempSync(join(tmpdir(), 'bornforthis-content-'));
   context.after(() => rmSync(projectRoot, { recursive: true, force: true }));
   const publicDir = join(projectRoot, 'public');
@@ -52,15 +52,12 @@ test('builds a recursive article tree and prunes non-content directories', (cont
   writeFixture(join(publicDir, '专题', '第二 层', '深层+文章.html'), '<title>深层文章</title>');
 
   const { tree, pages } = buildPublicContent(publicDir);
-  assert.deepEqual(tree.map((node) => node.path), ['专题', 'root article.html']);
-  assert.equal(pages.length, 4);
+  assert.deepEqual(tree.map((node) => node.path), ['专题']);
+  assert.equal(pages.length, 3);
   assert.equal(findNode(tree, 'images'), undefined);
   assert.equal(findNode(tree, 'hidden.html'), undefined);
   assert.equal(findNode(tree, 'also-hidden.html'), undefined);
-
-  const rootArticle = findNode(tree, 'root article.html');
-  assert.equal(rootArticle.label, 'Root & Article');
-  assert.equal(rootArticle.href, 'root%20article.html');
+  assert.equal(findNode(tree, 'root article.html'), undefined);
 
   const nestedFolder = findNode(tree, '专题/第二 层');
   assert.equal(nestedFolder.type, 'directory');
@@ -95,6 +92,7 @@ test('uses the same discovered pages for sitemap generation', (context) => {
   writeFixture(join(publicDir, 'CNAME'), 'example.com\n');
   writeFixture(join(publicDir, '文章', 'index.html'), '<title>文章</title>');
   writeFixture(join(publicDir, '文章', 'more+detail.html'), '<title>More</title>');
+  writeFixture(join(publicDir, 'root-utility.html'), '<title>Root utility</title>');
   writeFixture(join(publicDir, '404.html'), '<meta name="robots" content="noindex"><title>404</title>');
 
   const { pages } = generatePublicContent({ publicDir });
@@ -109,6 +107,7 @@ test('uses the same discovered pages for sitemap generation', (context) => {
   assert.match(firstSitemap, /<loc>https:\/\/example\.com\/%E6%96%87%E7%AB%A0\/<\/loc>/);
   assert.match(firstSitemap, /more%2Bdetail\.html/);
   assert.doesNotMatch(firstSitemap, /404\.html/);
+  assert.doesNotMatch(firstSitemap, /root-utility\.html/);
 });
 
 test('escapes sitemap locations as XML', () => {

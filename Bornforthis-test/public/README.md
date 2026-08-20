@@ -18,8 +18,9 @@
 
 ## 自动更新内容
 
-- HTML 直接放进 `public/`，会自动成为主页文章图标。
-- HTML 放进子文件夹，主页会自动显示文件夹；更深层目录会依次生成文件夹窗口。
+- 主页内容统一从 `public/` 的一级子文件夹开始；一级子文件夹会自动显示为主页文件夹。
+- HTML 放进这些子文件夹后会自动显示；更深层目录会依次生成文件夹窗口。
+- 直接放在 `public/` 根目录的 HTML 不会进入主页或 `sitemap.xml`。
 - `npm run dev` 与 `npm run build` 会自动更新主页内容树和 `sitemap.xml`，不再手工维护链接。
 - `public/index.html` 是保留文件名；当前 React 主页入口是项目根目录的 `index.html`。
 

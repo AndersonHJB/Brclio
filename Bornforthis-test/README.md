@@ -23,11 +23,11 @@ npm test
 
 ## Automatic Homepage Content
 
-The homepage and `public/sitemap.xml` now use `public/` as their single content source:
+The homepage and `public/sitemap.xml` now use subfolders under `public/` as their single content source:
 
-- Put an HTML file directly in `public/` to show it as a desktop article icon.
-- Put HTML files in a subfolder to show that subfolder as a desktop folder.
+- Each first-level subfolder containing HTML appears as a desktop folder.
 - Add deeper subfolders freely; each folder opens the next level with the existing desktop-window interaction.
+- HTML files directly in `public/` are ignored by the homepage and sitemap.
 - The visible label comes from the page's `<title>`, falling back to its file or folder name.
 - Directories that contain no HTML anywhere below them are treated as asset directories and stay hidden.
 - Pages with `<meta name="robots" content="noindex">` stay out of both the homepage and sitemap.
@@ -48,4 +48,4 @@ The index and sitemap regenerate when `npm run dev` starts, whenever HTML under 
 
 ## Updating The Homepage
 
-Add normal article content under `public/`; no homepage list or sitemap edit is needed. Keep structural changes in `src/components/HomePage.jsx`, visual changes in `src/styles/site.css`, and interaction changes in `src/lib/siteController.js`. Build after each code change to catch module and asset issues.
+Add normal article content inside a subfolder under `public/`; no homepage list or sitemap edit is needed. Keep structural changes in `src/components/HomePage.jsx`, visual changes in `src/styles/site.css`, and interaction changes in `src/lib/siteController.js`. Build after each code change to catch module and asset issues.

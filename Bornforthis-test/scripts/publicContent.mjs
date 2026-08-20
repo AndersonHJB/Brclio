@@ -164,6 +164,31 @@ function walkDirectory(publicDir, absoluteDirectory, relativeDirectory = '') {
   return nodes.sort(compareNodes);
 }
 
+function walkContentRoots(publicDir) {
+  const roots = [];
+  const entries = readdirSync(publicDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith('.'))
+    .sort((left, right) => collator.compare(left.name, right.name));
+
+  for (const entry of entries) {
+    const sourcePath = entry.name;
+    const children = walkDirectory(publicDir, join(publicDir, entry.name), sourcePath);
+    if (children.length === 0) continue;
+
+    roots.push({
+      type: 'directory',
+      name: entry.name,
+      label: entry.name,
+      path: sourcePath,
+      href: `${encodePublicPath(sourcePath)}/`,
+      windowId: folderWindowId(sourcePath),
+      children,
+    });
+  }
+
+  return roots.sort(compareNodes);
+}
+
 export function flattenHtmlPages(nodes) {
   return nodes.flatMap((node) => (
     node.type === 'file' ? [node] : flattenHtmlPages(node.children)
@@ -180,7 +205,7 @@ export function buildPublicContent(publicDir) {
     );
   }
 
-  const tree = walkDirectory(publicDir, publicDir);
+  const tree = walkContentRoots(publicDir);
   const pages = flattenHtmlPages(tree).sort((left, right) => collator.compare(left.href, right.href));
 
   return { tree, pages };
