@@ -4,11 +4,14 @@ import {
   workflowColumns,
   workDimensions,
 } from './homeData';
+import {
+  compactDesktopIcons,
+  DESKTOP_GRID_GAP,
+  DESKTOP_GRID_START,
+} from './desktopLayout';
 import publicContentTree from 'virtual:public-content';
 
 const DESKTOP_GRID_ROWS = 7;
-const DESKTOP_GRID_START = 24;
-const DESKTOP_GRID_GAP = 90;
 
 function positionKey(style) {
   return `${style.top}:${style.right}`;
@@ -48,7 +51,7 @@ function automaticDesktopIcons(nodes, fixedIcons) {
 }
 
 const publicDesktopIcons = automaticDesktopIcons(publicContentTree, desktopIcons);
-const allDesktopIcons = [...desktopIcons, ...publicDesktopIcons];
+const allDesktopIcons = compactDesktopIcons([...desktopIcons, ...publicDesktopIcons]);
 
 function DesktopIcon({ icon }) {
   return (
@@ -243,7 +246,7 @@ function HomeTab() {
         <div className="desktop-menubar"><span className="mb-logo">esther OS</span><span className="mb-item">About</span><span className="mb-item">Values</span><span className="mb-item">Now</span><span className="mb-clock" id="mbClock">--:--</span></div>
         <div className="desktop-surface" id="desktopSurface">
           {wallpaperStars.map((style, index) => <span key={index} className="wp-star" style={style}>✦</span>)}
-          <div className="desktop-sticker" id="buerSticker"><img src="esther-sticker.png" alt="不二" /></div>
+          <div className="desktop-sticker" id="buerSticker"><img src="brclio-sticker.png" alt="不二" /></div>
           <div className="desktop-icons">{allDesktopIcons.map((icon) => <DesktopIcon key={icon.id ?? icon.label} icon={icon} />)}</div>
           <WindowTemplates />
         </div>

@@ -158,7 +158,7 @@ function HomeTab() {
         <div className="desktop-menubar"><span className="mb-logo">esther OS</span><span className="mb-item">About</span><span className="mb-item">Values</span><span className="mb-item">Now</span><span className="mb-clock" id="mbClock">--:--</span></div>
         <div className="desktop-surface" id="desktopSurface">
           {wallpaperStars.map((style, index) => <span key={index} className="wp-star" style={style}>✦</span>)}
-          <div className="desktop-sticker" id="buerSticker"><img src="esther-sticker.png" alt="不二" /></div>
+          <div className="desktop-sticker" id="buerSticker"><img src="brclio-sticker.png" alt="不二" /></div>
           <div className="desktop-icons">{desktopIcons.map((icon) => <DesktopIcon key={icon.label} icon={icon} />)}</div>
           <WindowTemplates />
         </div>
