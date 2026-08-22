@@ -116,7 +116,7 @@ function WindowTemplates() {
   return (
     <>
       <div id="win-sayhi" className="window-template" style={{ display: 'none' }}>
-        <div className="os-window" data-title="Work With Me" data-url="esther.sjw@gmail.com">
+        <div className="os-window" data-title="Work With Me" data-url="aiyuechuang@gmail.com">
           <div className="os-body win-sayhi">
             <div className="sayhi-heading">Work With Me ✨</div>
             <div className="sayhi-sub">1 person + AI = 1 team</div>
@@ -133,8 +133,8 @@ function WindowTemplates() {
               </div>
             </div>
             <div className="sayhi-links">
-              <span>📮 <a href="mailto:esther.sjw@gmail.com">esther.sjw@gmail.com</a></span>
-              <span>📕 <a href="https://www.xiaohongshu.com/user/profile/55c6c7695894460904f87b47" target="_blank">小红书</a></span>
+              <span>📮 <a href="mailto:aiyuechuang@gmail.com">aiyuechuang@gmail.com</a></span>
+              <span>📕 <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank">小红书</a></span>
             </div>
           </div>
         </div>
@@ -260,7 +260,7 @@ function HomeTab() {
               <div className="goodbye-titlebar"><span className="terminal-dot red"></span><span className="terminal-dot yellow"></span><span className="terminal-dot green"></span><span className="goodbye-title-text">esther@universe ~ zsh</span></div>
               <div className="goodbye-body"><div className="goodbye-terminal">
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">echo "see you"</span></div><div className="gt-line gt-output">See you next time.</div><div className="gt-line">&nbsp;</div>
-                <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">cat contact.md</span></div><div className="gt-line gt-output">📮 <a href="mailto:esther.sjw@gmail.com">esther.sjw@gmail.com</a></div><div className="gt-line gt-output">📕 小红书 <a href="https://www.xiaohongshu.com/user/profile/55c6c7695894460904f87b47" target="_blank">@ESTHER不二</a></div><div className="gt-line">&nbsp;</div>
+                <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">cat contact.md</span></div><div className="gt-line gt-output">📮 <a href="mailto:aiyuechuang@gmail.com">aiyuechuang@gmail.com</a></div><div className="gt-line gt-output">📕 小红书 <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank">@ESTHER不二</a></div><div className="gt-line">&nbsp;</div>
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">fortune</span></div><div className="gt-line gt-dim">“找到你喜欢的事，然后让它杀死你。” — Bukowski</div><div className="gt-line">&nbsp;</div>
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">exit</span></div><div className="gt-line gt-output"><span className="gt-gold">[Process completed]</span></div>
               </div></div>
