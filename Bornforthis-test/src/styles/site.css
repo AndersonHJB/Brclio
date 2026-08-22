@@ -910,6 +910,10 @@ body {
   border-radius: 8px;
   margin-bottom: 6px;
 }
+.folder-icon-art.folder {
+  width: 48px;
+  height: 48px;
+}
 .folder-icon-art.file {
   background: #fff;
   border: 1.5px solid #ddd;
@@ -1505,6 +1509,7 @@ body {
   .desktop-sticker { width: 150px; left: 12px; right: auto; bottom: 16px; }
   .dicon { width: 68px; }
   .dicon-art { width: 42px; height: 42px; }
+  .folder-icon-art.folder { width: 42px; height: 42px; }
   .dicon-label { font-size: 10px; }
   .win-sayhi .services-grid { grid-template-columns: 1fr; }
   .os-body.win-sayhi { padding: 28px 20px; }
