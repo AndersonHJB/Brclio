@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bornforthis 个人 IP Skill 从参考图、身份锁、风格 DNA、Prompt、示例压力测试到安装发布的真实项目复盘。">
+  <title>从原版 Skill 到我的个人 IP｜Bornforthis 实战教程</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232B7FD8'/%3E%3Ccircle cx='22' cy='39' r='7' fill='%23F4D758'/%3E%3Ccircle cx='42' cy='39' r='7' fill='%23F4D758'/%3E%3Cpath d='M17 25l8-10 5 8 7-11 10 13' fill='none' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,600&family=Caveat:wght@500;700&family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --_esther-ds: "esthersjw-v1";
+      --blue: #2B7FD8;
+      --blue-deep: #1E5BA8;
+      --yellow: #F4D758;
+      --yellow-soft: #FFF3CD;
+      --red: #E84A5F;
+      --cream: #fefcf6;
+      --cream-dark: #faf6eb;
+      --ink: #1A1A2E;
+      --ink-light: #4A4A5A;
+      --ink-faint: #8A8A9A;
+      --dark-panel: #151821;
+      --green: #4F9E68;
+      --purple: #8166B5;
+      --brown: #9A6A43;
+      --cyan: #46A9B7;
+      --slide-pad: clamp(1.5rem, 4vw, 4.5rem);
+      --content-width: 1320px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+    button, a { font: inherit; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: var(--yellow); color: var(--ink); }
+
+    .progress {
+      position: fixed; inset: 0 auto auto 0; width: 0; height: 5px;
+      background: var(--red); z-index: 100; transition: width .35s cubic-bezier(.16,1,.3,1);
+    }
+    .deck-nav {
+      position: fixed; z-index: 90; right: 18px; top: 50%; transform: translateY(-50%);
+      display: grid; gap: 9px; padding: 11px 8px; border-radius: 999px;
+      background: rgba(254,252,246,.9); box-shadow: 0 10px 36px rgba(26,26,46,.10);
+      backdrop-filter: blur(10px);
+    }
+    .deck-dot { width: 9px; height: 9px; border: 0; border-radius: 50%; background: rgba(43,127,216,.18); cursor: pointer; }
+    .deck-dot.active { background: var(--blue); transform: scale(1.45); }
+    .page-indicator {
+      position: fixed; z-index: 90; left: 20px; bottom: 16px;
+      font: 500 .72rem/1 'Fira Code', monospace; color: var(--ink-faint);
+      background: rgba(254,252,246,.88); padding: 8px 12px; border-radius: 999px;
+    }
+    .help {
+      position: fixed; z-index: 90; right: 20px; bottom: 16px; border: 0; cursor: pointer;
+      color: var(--blue); background: rgba(254,252,246,.9); padding: 8px 12px; border-radius: 999px;
+      font: 700 .75rem/1 'Caveat', cursive; box-shadow: 0 6px 24px rgba(26,26,46,.08);
+    }
+
+    .slide {
+      min-height: 100svh; height: 100svh; scroll-snap-align: start; scroll-snap-stop: always;
+      position: relative; overflow: hidden; display: flex; align-items: center;
+      padding: var(--slide-pad); isolation: isolate;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(244,215,88,.16), transparent 28%),
+        radial-gradient(circle at 88% 82%, rgba(43,127,216,.08), transparent 30%), var(--cream);
+    }
+    .slide.alt { background: var(--cream-dark); }
+    .slide.dark { background: var(--dark-panel); color: #f2f3f7; }
+    .slide.blue { background: var(--blue-deep); color: #fffdf5; }
+    .slide.yellow { background: var(--yellow); }
+    .slide::after {
+      content: attr(data-index); position: absolute; right: clamp(28px,5vw,80px); top: clamp(24px,5vh,60px);
+      font: italic 700 clamp(4rem,10vw,8.5rem)/1 'Fraunces', serif; color: rgba(43,127,216,.08); z-index: -1;
+    }
+    .slide.dark::after, .slide.blue::after { color: rgba(255,255,255,.08); }
+    .slide-inner { width: min(100%, var(--content-width)); margin: 0 auto; position: relative; }
+    .kicker { display: block; color: var(--blue); font: 700 .76rem/1.3 'Fira Code', monospace; letter-spacing: .16em; text-transform: uppercase; margin-bottom: 1rem; }
+    .dark .kicker, .blue .kicker { color: var(--yellow); }
+    .hand { font-family: 'Caveat', cursive; color: var(--red); font-size: clamp(1.05rem,2vw,1.5rem); }
+    h1, h2, h3 { font-family: 'Noto Serif SC', serif; text-wrap: balance; }
+    h1 { font-size: clamp(2.8rem,6vw,5.7rem); line-height: 1.05; letter-spacing: -.04em; }
+    h2 { font-size: clamp(2rem,4.2vw,4.2rem); line-height: 1.12; letter-spacing: -.03em; }
+    h3 { font-size: clamp(1.05rem,1.8vw,1.42rem); line-height: 1.35; }
+    p { color: var(--ink-light); font-size: clamp(.88rem,1.25vw,1.07rem); line-height: 1.85; text-wrap:pretty; line-break:strict; }
+    .dark p, .blue p { color: rgba(255,255,255,.72); }
+    .lead { font-size: clamp(1.02rem,1.55vw,1.3rem); max-width: 62ch; }
+    .highlight { background: linear-gradient(to top, rgba(244,215,88,.72) 45%, transparent 45%); padding: 0 .08em; }
+    .red-underline { position: relative; display: inline-block; }
+    .red-underline::after { content:""; position:absolute; left:2%; right:-2%; bottom:-.08em; height:7px; background:var(--red); border-radius:8px; opacity:.7; }
+
+    .hero-grid { display: grid; grid-template-columns: .82fr 1.18fr; align-items: center; gap: clamp(2rem,5vw,5rem); }
+    .hero-copy p { margin-top: 1.6rem; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 2rem; }
+    .pill { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem .9rem; border-radius: 999px; background: rgba(43,127,216,.09); color: var(--blue-deep); font-size: .78rem; font-weight: 700; }
+    .pill.yellow { background: rgba(244,215,88,.3); color: #695800; }
+    .pill.red { background: rgba(232,74,95,.09); color: var(--red); }
+    .hero-art { width: 118%; margin-right: -18%; filter: drop-shadow(0 18px 35px rgba(26,26,46,.08)); }
+    .hero-art img, .visual img { display: block; width: 100%; height: auto; object-fit: contain; }
+
+    .split { display:grid; grid-template-columns:.78fr 1.22fr; gap:clamp(2rem,6vw,6rem); align-items:center; }
+    .split.reverse { grid-template-columns: 1.18fr .82fr; }
+    .split.reverse .copy { order: 2; }
+    .split.reverse .visual { order: 1; }
+    .copy > p { margin-top: 1.25rem; }
+    .visual { position:relative; min-width:0; }
+    .visual.bleed { width: 112%; }
+    .visual-frame { padding: clamp(.7rem,1.4vw,1.1rem); border: 2px dashed rgba(244,215,88,.8); border-radius: 20px; position:relative; }
+    .visual-frame::before { content:""; position:absolute; inset:-7px; border:1px solid rgba(43,127,216,.18); border-radius:24px; pointer-events:none; }
+    .caption { margin-top:.8rem; color:var(--ink-faint); font:500 .72rem/1.55 'Fira Code',monospace; }
+
+    .metric-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(1rem,2vw,1.5rem); margin-top:clamp(2rem,4vw,3.5rem); }
+    .metric { padding:clamp(1.3rem,2vw,2rem); background:rgba(255,255,255,.7); border-radius:18px; border-bottom:5px solid var(--yellow); }
+    .metric:nth-child(2) { border-color:var(--blue); }
+    .metric:nth-child(3) { border-color:var(--red); }
+    .metric strong { display:block; font:700 clamp(2.4rem,5vw,4.8rem)/1 'Fraunces',serif; color:var(--blue); }
+    .metric span { display:block; margin-top:.7rem; color:var(--ink-light); font-size:.86rem; line-height:1.6; }
+
+    .timeline { display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-top:clamp(2.2rem,5vw,4.5rem); position:relative; }
+    .timeline::before { content:""; position:absolute; top:25px; left:5%; right:5%; height:4px; background:linear-gradient(90deg,var(--yellow),var(--blue),var(--red)); }
+    .time-item { position:relative; padding:0 .8rem; }
+    .time-dot { width:52px; height:52px; border-radius:50%; display:grid; place-items:center; background:var(--blue); color:white; font:700 1rem/1 'Fraunces',serif; position:relative; z-index:1; box-shadow:0 0 0 8px var(--cream); }
+    .time-item:nth-child(2) .time-dot, .time-item:nth-child(5) .time-dot { background:var(--yellow); color:var(--ink); }
+    .time-item:nth-child(4) .time-dot { background:var(--red); }
+    .time-item h3 { margin-top:1.4rem; font-size:1rem; }
+    .time-item p { margin-top:.45rem; font-size:.78rem; line-height:1.65; }
+
+    .comparison { display:grid; grid-template-columns:1fr 1fr; gap:clamp(1rem,3vw,2.2rem); margin-top:2rem; }
+    .compare-panel { padding:clamp(1.5rem,3vw,2.6rem); border-radius:22px; background:rgba(255,255,255,.75); min-height:270px; }
+    .compare-panel.source { background:#efede7; color:#34343c; }
+    .compare-panel.personal { background:var(--yellow-soft); }
+    .compare-label { font:700 .72rem/1 'Fira Code',monospace; letter-spacing:.13em; color:var(--ink-faint); }
+    .compare-panel h3 { margin:1rem 0 1.1rem; font-size:clamp(1.45rem,2.5vw,2.2rem); }
+    .token-row { display:flex; flex-wrap:wrap; gap:.55rem; }
+    .token { padding:.52rem .75rem; border-radius:8px; background:rgba(255,255,255,.72); font-size:.78rem; color:var(--ink-light); }
+
+    .reference-grid { display:grid; grid-template-columns:.86fr .74fr .7fr; gap:clamp(1rem,2.2vw,2rem); align-items:end; margin-top:2rem; }
+    .reference-card { background:rgba(255,255,255,.76); padding:1rem; border-radius:18px; box-shadow:0 12px 40px rgba(26,26,46,.06); }
+    .reference-card img { display:block; width:100%; max-height:55vh; object-fit:contain; }
+    .reference-card .label { margin-top:.7rem; color:var(--blue); font:500 .72rem/1.5 'Fira Code',monospace; }
+    .anchor-card { padding:clamp(1.5rem,2.5vw,2.3rem); background:var(--blue); color:white; border-radius:18px; }
+    .anchor-word { font-family:'Noto Serif SC',serif; font-size:clamp(2.5rem,5vw,5.2rem); font-weight:900; color:var(--yellow); line-height:1; }
+    .anchor-chain { margin-top:1rem; font:700 clamp(.85rem,1.2vw,1rem)/1.8 'Fira Code',monospace; color:rgba(255,255,255,.82); }
+
+    .rule-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(1rem,2vw,1.5rem); margin-top:2.2rem; }
+    .rule-card { position:relative; padding:clamp(1.4rem,2.5vw,2.1rem); border-radius:16px; background:rgba(255,255,255,.75); overflow:hidden; }
+    .rule-card .num { position:absolute; top:-.18em; right:.05em; font:700 5.5rem/1 'Fraunces',serif; color:rgba(43,127,216,.08); }
+    .rule-card p { margin-top:.7rem; font-size:.82rem; }
+    .swatches { display:flex; gap:.65rem; margin-top:1.4rem; }
+    .swatch { flex:1; height:38px; border-radius:8px; position:relative; }
+    .swatch::after { content:attr(data-name); position:absolute; left:8px; bottom:6px; font:500 .62rem/1 'Fira Code',monospace; }
+
+    .file-map { display:grid; grid-template-columns:.7fr 1.3fr; gap:clamp(2rem,5vw,5rem); align-items:start; }
+    .file-list { display:grid; gap:.7rem; }
+    .file-item { display:grid; grid-template-columns:42px 1fr; gap:.8rem; align-items:center; padding:.8rem 1rem; background:rgba(255,255,255,.8); border-radius:12px; }
+    .file-item code { color:var(--blue-deep); font:500 .78rem/1.4 'Fira Code',monospace; }
+    .file-item span { font-size:.75rem; color:var(--ink-faint); }
+    .file-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; background:var(--yellow-soft); font-size:.9rem; }
+    .do-not { margin-top:1.2rem; padding:1.1rem 1.2rem; border-radius:12px; background:rgba(232,74,95,.08); color:var(--red); font-size:.78rem; font-weight:700; }
+
+    .code-window { border-radius:16px; overflow:hidden; box-shadow:0 18px 60px rgba(0,0,0,.25); background:#1a1b26; }
+    .code-bar { display:flex; align-items:center; gap:7px; padding:12px 16px; background:#2d2d3a; }
+    .code-dot { width:11px; height:11px; border-radius:50%; background:var(--red); }
+    .code-dot:nth-child(2){background:var(--yellow)} .code-dot:nth-child(3){background:#4ade80}
+    .code-name { margin-left:auto; margin-right:auto; font:500 .68rem/1 'Fira Code',monospace; color:#8A8A9A; }
+    .code-body { padding:clamp(1.25rem,2.5vw,2.2rem); font:400 clamp(.68rem,1vw,.86rem)/1.85 'Fira Code',monospace; color:#a9b1d6; overflow:auto; white-space:pre-wrap; }
+    .kw{color:#bb9af7}.str{color:#9ece6a}.cm{color:#565f89}.fn{color:#7aa2f7}.warn{color:#f7768e}.gold{color:#e0af68}
+
+    .version-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(.8rem,1.7vw,1.4rem); margin-top:2rem; }
+    .version { min-width:0; }
+    .version img { width:100%; display:block; border-radius:14px; background:var(--cream); }
+    .version-head { display:flex; justify-content:space-between; align-items:baseline; margin-top:.9rem; }
+    .version-head strong { font:700 1.5rem/1 'Fraunces',serif; color:var(--blue); }
+    .version-head span { color:var(--red); font:700 .74rem/1 'Fira Code',monospace; }
+    .version p { font-size:.76rem; margin-top:.45rem; }
+
+    .qa-grid { display:grid; grid-template-columns:.88fr 1.12fr; gap:clamp(2rem,5vw,5rem); align-items:center; }
+    .check-list { display:grid; gap:.75rem; margin-top:1.6rem; }
+    .check { display:grid; grid-template-columns:28px 1fr; gap:.8rem; align-items:start; }
+    .check-mark { width:24px; height:24px; border-radius:50%; display:grid; place-items:center; color:white; background:var(--green); font-size:.75rem; font-weight:700; }
+    .check strong { display:block; font-size:.88rem; }
+    .check p { font-size:.75rem; margin-top:.15rem; }
+
+    .proof-layout { display:grid; grid-template-columns:.62fr 1.38fr; gap:clamp(2rem,5vw,5rem); align-items:center; }
+    .proof-layout img { width:108%; max-height:72vh; object-fit:contain; }
+    .proof-stat { margin-top:1.8rem; display:grid; grid-template-columns:repeat(2,1fr); gap:.75rem; }
+    .proof-stat div { padding:1rem; background:rgba(255,255,255,.72); border-radius:12px; }
+    .proof-stat strong { display:block; color:var(--blue); font:700 1.8rem/1 'Fraunces',serif; }
+    .proof-stat span { font-size:.72rem; color:var(--ink-faint); }
+
+    .closing { display:grid; grid-template-columns:.9fr 1.1fr; gap:clamp(2rem,5vw,5rem); align-items:center; }
+    .recipe { display:grid; gap:.75rem; margin-top:1.6rem; }
+    .recipe-item { display:grid; grid-template-columns:54px 1fr; align-items:center; gap:1rem; }
+    .recipe-num { width:50px; height:50px; border-radius:50%; background:var(--yellow); display:grid; place-items:center; color:var(--ink); font:700 1rem/1 'Fraunces',serif; }
+    .recipe-item strong { color:white; display:block; font-size:.9rem; }
+    .recipe-item span { color:rgba(255,255,255,.62); font-size:.74rem; }
+    .credit { margin-top:2rem; font-size:.68rem; color:rgba(255,255,255,.44); line-height:1.7; }
+
+    /* === Beginner tutorial components: INPUT → PROMPT → OUTPUT → CHECK === */
+    #archived-deck-old, #archived-deck-v3 { display:none !important; }
+    /* === V4: complete method first, Bornforthis case second === */
+    .v4-shell { width:min(100%,1260px); margin:0 auto; position:relative; }
+    .v4-hero { display:grid; grid-template-columns:.92fr 1.08fr; gap:clamp(2rem,5vw,5rem); align-items:center; }
+    .v4-hero h1 { font-size:clamp(2.65rem,5.6vw,5.4rem); }
+    .v4-sub { margin-top:1.35rem; max-width:54ch; font-size:clamp(1rem,1.45vw,1.22rem); }
+    .part-label { display:inline-flex; align-items:center; gap:.65rem; padding:.56rem .86rem; border-radius:999px; background:var(--blue); color:#fff; font:700 .69rem/1 'Fira Code',monospace; letter-spacing:.08em; }
+    .part-label.yellow { background:var(--yellow); color:var(--ink); }
+    .part-label.red { background:var(--red); color:#fff; }
+    .route-seven { display:grid; grid-template-columns:repeat(7,1fr); gap:.68rem; margin-top:2rem; }
+    .route-seven article { position:relative; min-height:150px; padding:1.1rem .85rem; background:rgba(255,255,255,.77); border-radius:14px; border-bottom:5px solid var(--yellow); }
+    .route-seven article:nth-child(2n){border-color:var(--blue)} .route-seven article:nth-child(3n){border-color:var(--red)}
+    .route-seven b { display:block; color:var(--blue); font:700 1.25rem/1 'Fraunces',serif; }
+    .route-seven span { display:block; margin-top:.72rem; font-size:.75rem; font-weight:700; line-height:1.55; }
+    .route-seven small { display:block; margin-top:.4rem; color:var(--ink-faint); font:500 .6rem/1.4 'Fira Code',monospace; }
+    .method-grid { display:grid; grid-template-columns:minmax(270px,.7fr) minmax(0,1.3fr); gap:clamp(1.6rem,4vw,4.5rem); align-items:center; }
+    .method-grid.reverse { grid-template-columns:minmax(0,1.3fr) minmax(270px,.7fr); }
+    .method-grid.reverse .method-copy { order:2; }
+    .method-grid.reverse .method-visual { order:1; }
+    .method-grid.stack,.method-grid.stack.reverse { grid-template-columns:1fr; gap:clamp(.7rem,1.8vh,1.15rem); }
+    .method-grid.stack .method-visual { order:1; }
+    .method-grid.stack .method-copy { order:2; display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:clamp(1rem,3vw,2.2rem); align-items:end; }
+    .method-grid.stack .part-label { grid-column:1 / -1; justify-self:start; }
+    .method-grid.stack .method-num { grid-column:1; grid-row:2 / span 4; align-self:start; }
+    .method-grid.stack h2,.method-grid.stack p,.method-grid.stack .fact-strip,.method-grid.stack .method-prompt { grid-column:2; }
+    .method-grid.stack h2 { margin-top:0; }
+    .method-grid.stack p { margin-top:.5rem; max-width:58rem; }
+    .method-grid.stack .fact-strip { margin-top:.6rem; }
+    .method-grid.stack .method-prompt { margin-top:.65rem; }
+    .method-grid.stack .method-visual .result-card img { max-height:42vh; }
+    .method-num { color:rgba(43,127,216,.14); font:italic 900 clamp(3.8rem,8vw,7.2rem)/.78 'Fraunces',serif; }
+    .method-copy h2 { margin-top:-.08rem; font-size:clamp(1.9rem,3.7vw,3.75rem); }
+    .method-copy p { margin-top:.85rem; max-width:34rem; }
+    .method-copy .method-prompt { margin-top:1rem; }
+    .method-points { display:grid; gap:.65rem; margin-top:1.2rem; }
+    .method-point { display:grid; grid-template-columns:34px 1fr; gap:.7rem; align-items:start; padding:.8rem .9rem; border-radius:10px; background:rgba(255,255,255,.75); }
+    .method-point b { display:grid; place-items:center; width:28px; height:28px; border-radius:50%; background:var(--yellow); font:700 .7rem/1 'Fira Code',monospace; }
+    .method-point span { color:var(--ink-light); font-size:.78rem; line-height:1.62; }
+    .method-visual { display:flex; flex-direction:column; gap:.7rem; min-width:0; }
+    .method-visual .result-card { display:grid; align-content:center; min-width:0; padding:clamp(.55rem,1vw,.85rem); border-radius:22px; }
+    .method-visual .result-card img { width:100%; max-height:53vh; object-fit:contain; }
+    .method-visual .result-card figcaption { padding:.5rem .25rem .05rem; }
+    .method-prompt { overflow:hidden; border-radius:14px; background:#1a1b26; box-shadow:0 10px 30px rgba(26,26,46,.14); min-width:0; }
+    .method-prompt summary { list-style:none; cursor:pointer; }
+    .method-prompt summary::-webkit-details-marker { display:none; }
+    .method-prompt .prompt-head::before { content:'＋'; color:var(--yellow); font:700 .9rem/1 'Fira Code',monospace; }
+    .method-prompt[open] .prompt-head::before { content:'－'; }
+    .method-prompt .prompt-head em { color:#898b9d; font-style:normal; font-weight:500; margin-left:.2rem; }
+    .method-prompt[open] .prompt-head em { font-size:0; }
+    .method-prompt[open] .prompt-head em::after { content:'点击收起'; font-size:.67rem; }
+    .method-prompt code { display:block; max-height:21vh; overflow:auto; padding:.9rem 1rem; color:#c7c9d8; font:400 clamp(.6rem,.74vw,.7rem)/1.62 'Fira Code',monospace; white-space:pre-wrap; }
+    .chapter-break { text-align:left; background:var(--blue-deep)!important; color:#fff; }
+    .chapter-break .v4-shell { display:grid; grid-template-columns:.65fr 1.35fr; gap:clamp(2rem,7vw,7rem); align-items:end; }
+    .chapter-kicker { color:var(--yellow); font:italic 700 clamp(4rem,11vw,10rem)/.8 'Fraunces',serif; }
+    .chapter-break h2 { color:#fff; font-size:clamp(2.7rem,6vw,6rem); }
+    .chapter-break p { margin-top:1rem; color:rgba(255,255,255,.72); }
+    .evidence-layout { display:grid; grid-template-columns:.84fr 1.16fr; gap:clamp(1.7rem,4vw,4rem); align-items:center; }
+    .evidence-layout.flip { grid-template-columns:1.16fr .84fr; } .evidence-layout.flip .evidence-copy{order:2}
+    .evidence-copy h2 { font-size:clamp(1.9rem,3.8vw,3.7rem); }
+    .fact-strip { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1rem; }
+    .fact-strip span { padding:.5rem .72rem; border-radius:999px; background:rgba(43,127,216,.09); color:var(--blue); font-size:.7rem; font-weight:700; }
+    .result-card { padding:1.15rem; border-radius:16px; background:rgba(255,255,255,.8); box-shadow:0 14px 38px rgba(26,26,46,.07); }
+    .result-card img { display:block; width:100%; max-height:49vh; object-fit:contain; }
+    .result-card figcaption { padding:.8rem .2rem .1rem; color:var(--ink-faint); font-size:.7rem; line-height:1.55; }
+    .actual-chat { display:grid; gap:.75rem; margin-top:1.2rem; }
+    .actual-chat .user-line { justify-self:end; max-width:92%; padding:.8rem 1rem; border-radius:16px 16px 4px 16px; background:var(--yellow); color:var(--ink); font-size:.75rem; line-height:1.65; }
+    .actual-chat .result-line { max-width:92%; padding:.8rem 1rem; border-radius:16px 16px 16px 4px; background:var(--blue); color:#fff; font-size:.75rem; line-height:1.65; }
+    .prompt-receipt { overflow:hidden; border-radius:16px; background:#1a1b26; box-shadow:0 18px 55px rgba(26,26,46,.18); }
+    .prompt-head { display:flex; align-items:center; gap:.7rem; padding:.8rem 1rem; background:#2d2d3a; color:#d8d9e5; font:700 .67rem/1 'Fira Code',monospace; }
+    .prompt-head .copy-btn { margin-left:auto; }
+    .prompt-receipt code { display:block; max-height:43vh; overflow:auto; padding:1rem 1.2rem; color:#c7c9d8; font:400 clamp(.64rem,.85vw,.76rem)/1.72 'Fira Code',monospace; white-space:pre-wrap; }
+    .receipt-foot { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:#414251; }
+    .receipt-foot span { padding:.72rem 1rem; background:#252631; color:#aeb1c6; font-size:.66rem; line-height:1.5; }
+    .receipt-foot b { color:var(--yellow); }
+    .version-story { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.5rem; }
+    .version-story article { padding:1.25rem; border-radius:14px; background:rgba(255,255,255,.78); border-bottom:5px solid var(--yellow); }
+    .version-story article:nth-child(2){border-color:var(--blue)} .version-story article:nth-child(3){border-color:var(--red)}
+    .version-story b { color:var(--blue); font:900 1.8rem/1 'Fraunces',serif; }
+    .version-story h3 { margin-top:.65rem; font-size:1rem; }
+    .version-story p { margin-top:.45rem; font-size:.72rem; line-height:1.62; }
+    #v4-15 .version-story { margin-top:1rem; }
+    #v4-15 .version-story article { padding:1rem 1.1rem; }
+    #v4-15 .result-card { margin-top:.8rem!important; padding:.75rem; }
+    #v4-15 .result-card img { max-height:31vh; }
+    #v4-15 .version-grid { margin-top:1rem; }
+    #v4-15 .version img { height:clamp(145px,27vh,245px); object-fit:contain; background:#fff; }
+    #v4-15 .version-head { margin-top:.55rem; }
+    #v4-15 .version p { margin-top:.38rem; font-size:.69rem; line-height:1.55; }
+    .file-proof { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .file-proof article { padding:1.2rem; border-radius:14px; background:rgba(255,255,255,.78); }
+    .file-proof b { color:var(--blue); font:700 .68rem/1 'Fira Code',monospace; }
+    .file-proof code { display:block; margin-top:.8rem; color:var(--ink-light); font:400 .7rem/1.7 'Fira Code',monospace; white-space:pre-wrap; }
+    .kit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.6rem; }
+    .kit-card { padding:1.35rem; border-radius:16px; background:rgba(255,255,255,.82); border-bottom:5px solid var(--yellow); }
+    .kit-card:nth-child(2){border-color:var(--blue)} .kit-card:nth-child(3){border-color:var(--red)}
+    .kit-card b { color:var(--blue); font:700 .72rem/1 'Fira Code',monospace; }
+    .kit-card h3 { margin-top:.8rem; }
+    .kit-card p { margin-top:.55rem; font-size:.76rem; line-height:1.65; }
+    @media(max-width:900px){
+      .v4-hero,.method-grid,.method-grid.reverse,.chapter-break .v4-shell,.evidence-layout,.evidence-layout.flip{grid-template-columns:1fr}
+      .method-copy,.method-grid.reverse .method-copy{order:2}
+      .method-visual,.method-grid.reverse .method-visual{order:1}
+      .method-grid.stack .method-copy { display:block; }
+      .evidence-layout.flip .evidence-copy{order:initial}
+      .route-seven{grid-template-columns:repeat(2,1fr)} .route-seven article:last-child{grid-column:1/-1}
+      .version-story,.kit-grid,.file-proof{grid-template-columns:1fr}
+      .method-visual .result-card img{max-height:40vh}.receipt-foot{grid-template-columns:1fr}
+    }
+    @media (min-width:901px) and (max-width:1100px) and (min-height:850px) {
+      .method-grid,.method-grid.reverse { grid-template-columns:1fr; gap:1rem; align-content:center; }
+      .method-copy,.method-grid.reverse .method-copy { order:2; display:grid; grid-template-columns:auto 1fr; column-gap:1.3rem; align-items:end; }
+      .method-visual,.method-grid.reverse .method-visual { order:1; }
+      .method-copy .part-label { grid-column:1; align-self:start; justify-self:start; }
+      .method-copy .method-num { grid-column:1; grid-row:2 / span 3; align-self:start; }
+      .method-copy h2,.method-copy p,.method-copy .fact-strip { grid-column:2; }
+      .method-copy h2 { margin-top:0; }
+      .method-copy p { margin-top:.55rem; }
+      .method-copy .fact-strip { margin-top:.7rem; }
+      .method-visual .result-card img { max-height:43vh; }
+    }
+    @media (max-height:820px) and (min-width:901px) {
+      :root { --slide-pad: clamp(1rem, 3vh, 2.1rem); }
+      .deck-nav { gap:5px; padding:8px 6px; }
+      .deck-dot { width:7px; height:7px; }
+      .method-num { font-size:clamp(3rem,7vh,5rem); }
+      .method-copy h2,.evidence-copy h2 { font-size:clamp(1.7rem,3vw,2.9rem); }
+      .method-copy p,.v4-sub { font-size:.84rem; line-height:1.62; }
+      .method-visual .result-card img { max-height:43vh; }
+      .method-prompt code { max-height:19vh; font-size:.59rem; line-height:1.52; }
+      .result-card img { max-height:39vh; }
+      .result-card figcaption { padding:.55rem .1rem 0; }
+      #v4-16 .v4-shell + .v4-shell,#v4-18 .v4-shell + .v4-shell { margin-top:.55rem!important; }
+      #v4-16 .prompt-receipt code,#v4-18 .prompt-receipt code { max-height:18vh; font-size:.59rem; line-height:1.5; }
+    }
+    .roadmap-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.72rem; margin-top:1.25rem; }
+    .roadmap-item { padding:.9rem 1rem; min-height:118px; border-radius:15px; background:rgba(255,255,255,.76); border-bottom:5px solid var(--yellow); }
+    .roadmap-item:nth-child(3n+2){border-color:var(--blue)} .roadmap-item:nth-child(3n){border-color:var(--red)}
+    .roadmap-item b { display:block; color:var(--blue); font:700 .72rem/1 'Fira Code',monospace; }
+    .roadmap-item strong { display:block; margin-top:.7rem; font-family:'Noto Serif SC',serif; font-size:.98rem; }
+    .roadmap-item span { display:block; margin-top:.4rem; color:var(--ink-faint); font-size:.72rem; line-height:1.55; }
+    .step-layout { display:grid; grid-template-columns:.68fr 1.32fr; gap:clamp(1.5rem,4vw,4rem); align-items:center; }
+    .step-badge { display:inline-grid; place-items:center; min-width:76px; height:36px; padding:0 .9rem; border-radius:999px; background:var(--blue); color:white; font:700 .72rem/1 'Fira Code',monospace; margin-bottom:1rem; }
+    .step-layout h2 { font-size:clamp(1.8rem,3.6vw,3.7rem); }
+    .io-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-top:1.35rem; }
+    .io-card { padding:1rem 1.05rem; border-radius:12px; background:rgba(255,255,255,.74); }
+    .io-card b { display:block; color:var(--blue); font:700 .68rem/1 'Fira Code',monospace; letter-spacing:.08em; }
+    .io-card span { display:block; margin-top:.45rem; color:var(--ink-light); font-size:.76rem; line-height:1.62; }
+    .io-card.check { background:rgba(79,158,104,.1); } .io-card.check b{color:var(--green)}
+    .prompt-panel { border-radius:16px; overflow:hidden; background:#1a1b26; box-shadow:0 18px 55px rgba(26,26,46,.18); min-width:0; }
+    .prompt-toolbar { display:flex; align-items:center; gap:.55rem; padding:.78rem 1rem; background:#2d2d3a; }
+    .prompt-toolbar .label { color:#a9b1d6; font:500 .68rem/1 'Fira Code',monospace; }
+    .copy-btn { margin-left:auto; border:0; border-radius:999px; padding:.48rem .78rem; cursor:pointer; background:var(--yellow); color:var(--ink); font:700 .68rem/1 'Noto Sans SC',sans-serif; transition:transform .2s ease,background .2s ease; }
+    .copy-btn:hover { transform:translateY(-2px); } .copy-btn.copied{background:#4ade80}
+    .prompt-text { display:block; padding:clamp(1rem,2vw,1.55rem); color:#c7c9d8; font:400 clamp(.65rem,.9vw,.78rem)/1.72 'Fira Code',monospace; white-space:pre-wrap; overflow:auto; max-height:47vh; }
+    .prompt-note { padding:.75rem 1rem; background:rgba(244,215,88,.1); color:#d7c779; font-size:.7rem; line-height:1.55; }
+    .placeholder { color:#e0af68; font-weight:500; }
+    .mini-command .prompt-text { max-height:38vh; }
+    .pit-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.8rem; }
+    .pit { padding:1.25rem; border-radius:14px; background:rgba(255,255,255,.74); }
+    .pit .bad { color:var(--red); font:700 .7rem/1 'Fira Code',monospace; }
+    .pit .fix { color:var(--green); font:700 .7rem/1 'Fira Code',monospace; margin-top:.8rem; display:block; }
+    .pit p { font-size:.75rem; margin-top:.4rem; }
+    .deliverable-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin-top:1.15rem; }
+    .deliverable { padding:1rem; border-radius:12px; background:rgba(255,255,255,.74); text-align:left; }
+    .deliverable strong { color:var(--blue); font:700 1.4rem/1 'Fraunces',serif; }
+    .deliverable span { display:block; color:var(--ink-faint); font-size:.7rem; margin-top:.35rem; }
+    #deck .slide { display:grid; align-content:center; }
+    .eyebrow { margin-bottom:1rem; color:var(--blue); font:700 .7rem/1 'Fira Code',monospace; letter-spacing:.14em; }
+    .page-no { position:absolute; right:clamp(28px,5vw,80px); top:clamp(24px,5vh,60px); color:rgba(43,127,216,.35); font:italic 700 1.05rem/1 'Fraunces',serif; }
+    .chips { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1.2rem; }
+    .chips span { padding:.48rem .72rem; border-radius:999px; background:rgba(43,127,216,.09); color:var(--blue-deep); font-size:.72rem; font-weight:700; }
+    .io-card p { margin-top:.5rem; font-size:.76rem; line-height:1.62; }
+    .deliverable b { display:block; margin-bottom:.32rem; color:var(--blue); font:700 1.15rem/1 'Fraunces',serif; }
+    .big-quote { margin-top:1rem; color:var(--blue); font:900 clamp(2.6rem,6vw,5.2rem)/1 'Noto Serif SC',serif; }
+    .pipeline { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; margin-top:1.3rem; }
+    .pipeline span { padding:.55rem .68rem; border-radius:9px; background:rgba(43,127,216,.1); color:var(--blue); font:700 .66rem/1 'Fira Code',monospace; }
+    .pipeline i { color:var(--red); font-style:normal; }
+    .tree { margin-top:1rem; padding:1rem; border-radius:12px; background:#1a1b26; overflow:auto; }
+    .tree code { color:#c7c9d8; font:400 clamp(.64rem,.9vw,.78rem)/1.58 'Fira Code',monospace; white-space:pre; }
+    .callout { margin-top:1.2rem; padding:1.05rem 1.15rem; border-radius:12px; background:rgba(232,74,95,.07); box-shadow:inset 0 -5px 0 rgba(232,74,95,.45); }
+    .callout p { margin-top:.4rem; font-size:.8rem; line-height:1.65; }
+    .mini-command { margin-top:1rem; padding:.75rem 1rem; border-radius:10px; background:rgba(43,127,216,.08); color:var(--blue); font:600 clamp(.66rem,.95vw,.82rem)/1.45 'Fira Code',monospace; overflow-wrap:anywhere; }
+    #deck .hero-art { width:100%; margin-right:0; }
+    .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem; min-width:0; }
+    .compare figure { margin:0; min-width:0; padding:.8rem; border-radius:14px; background:rgba(255,255,255,.82); box-shadow:0 10px 30px rgba(26,26,46,.07); }
+    .compare img { display:block; width:100%; height:clamp(180px,31vh,285px); object-fit:contain; border-radius:9px; background:#fff; }
+    .compare figcaption { padding:.65rem .25rem 0; color:var(--ink-soft); font-size:clamp(.7rem,.9vw,.86rem); line-height:1.55; }
+    .media-card { margin-top:1rem; padding:.7rem; border-radius:16px; background:rgba(255,255,255,.84); box-shadow:0 14px 38px rgba(26,26,46,.08); overflow:hidden; }
+    .media-card img { display:block; width:100%; height:clamp(190px,34vh,305px); object-fit:contain; border-radius:10px; background:#fff; }
+
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1); }
+    .slide.active .reveal { opacity:1; transform:none; }
+    .slide.active .reveal.d1 { transition-delay:.1s } .slide.active .reveal.d2{transition-delay:.2s}.slide.active .reveal.d3{transition-delay:.3s}
+
+    .help-panel { position:fixed; inset:0; z-index:120; display:none; place-items:center; padding:1.5rem; background:rgba(21,24,33,.72); }
+    .help-panel.open { display:grid; }
+    .help-card { width:min(680px,100%); padding:2rem; border-radius:22px; background:var(--cream); box-shadow:0 24px 80px rgba(0,0,0,.3); }
+    .help-card h3 { font-size:1.55rem; }
+    .key-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:.8rem; margin-top:1.2rem; }
+    .key { padding:1rem; border-radius:10px; background:var(--cream-dark); font-size:.8rem; }
+    .key b { font-family:'Fira Code',monospace; color:var(--blue); }
+
+    @media (max-width: 900px) {
+      html { scroll-snap-type:y proximity; }
+      .slide { height:auto; min-height:100svh; overflow:visible; padding:clamp(4rem,8vh,6rem) 1.3rem; }
+      #deck .slide { display:grid; align-content:center; }
+      .hero-grid,.split,.split.reverse,.reference-grid,.file-map,.qa-grid,.proof-layout,.closing { grid-template-columns:1fr; }
+      .split.reverse .copy,.split.reverse .visual { order:initial; }
+      .hero-art,.visual.bleed,.proof-layout img { width:100%; margin:0; max-height:46vh; }
+      .metric-grid,.rule-grid,.version-grid,.roadmap-grid,.pit-grid,.deliverable-strip { grid-template-columns:1fr; }
+      .step-layout { grid-template-columns:1fr; }
+      .prompt-text { max-height:none; }
+      .method-prompt code { max-height:none; }
+      .io-grid { grid-template-columns:1fr; }
+      .compare { grid-template-columns:1fr 1fr; }
+      .compare img { height:210px; }
+      .media-card img { height:auto; max-height:42vh; }
+      .timeline { grid-template-columns:1fr; gap:1rem; }
+      .timeline::before { left:25px; top:0; bottom:0; width:3px; height:auto; }
+      .time-item { display:grid; grid-template-columns:52px 1fr; gap:1rem; padding:0; }
+      .time-item h3 { margin:.1rem 0 0; } .time-item p{grid-column:2;margin-top:-.5rem}
+      .comparison { grid-template-columns:1fr; }
+      .reference-card img { max-height:34vh; }
+      .deck-nav { display:none; }
+      .slide::after { font-size:4rem; }
+    }
+    @media (max-width:600px) {
+      body{font-size:15px}.proof-stat,.key-grid,.io-grid,.compare{grid-template-columns:1fr}.page-indicator{left:10px;top:10px;bottom:auto}.help{display:none}
+    }
+    @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none;transition:none}.progress{transition:none}}
+    @media print {
+      .progress,.deck-nav,.page-indicator,.help,.help-panel{display:none!important}
+      .slide{height:100vh;break-after:page;overflow:hidden}.reveal{opacity:1!important;transform:none!important}
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <nav class="deck-nav" id="deckNav" aria-label="幻灯片导航"></nav>
+  <div class="page-indicator" id="pageIndicator">01 / 22</div>
+  <button class="help" id="helpBtn" aria-label="打开演示帮助">keys?</button>
+
+  <main id="deck">
+    <section class="slide" id="v4-01">
+      <div class="v4-shell v4-hero">
+        <div>
+          <span class="part-label">TUTORIAL · 1 HOUR</span>
+          <h1>站在巨人的肩膀上<br><span class="highlight">定制自己的 Skill</span></h1>
+          <p class="v4-sub">我用 1 小时把别人的 AI 插画 Skill 变成了自己的。整个过程只需要 AI 助手 + GitHub 仓库。</p>
+          <div class="fact-strip"><span>复刻</span><span>先不改</span><span>原样搬</span></div>
+        </div>
+        <figure class="result-card">
+          <img src="assets/hero-skill-transformation.webp" alt="Bornforthis 把插画 Skill 复刻成自己的 IP 配图系统">
+          <figcaption>复刻 · 先不改 · 原样搬</figcaption>
+        </figure>
+      </div>
+      <span class="page-no">01</span>
+    </section>
+
+    <section class="slide alt" id="v4-02">
+      <div class="v4-shell method-grid reverse">
+        <div class="method-copy">
+          <span class="part-label yellow">01 Fork 仓库</span>
+          <div class="method-num">01</div>
+          <h2>Fork / 复制原始仓库</h2>
+          <p>找到喜欢的 Skill 仓库，Fork 到自己的 GitHub。先不改任何东西，原样搬过来跑通。</p>
+          <div class="fact-strip"><span>复刻</span><span>先不改</span><span>原样搬</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 01 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m01">复制</button></summary><code id="m01">请把【原始 Skill 仓库 URL】复制到我的 GitHub 仓库【目标仓库 URL】，并克隆到【本地目录】。先不要修改任何文件，原样跑通。完成后报告：仓库地址、本地路径、当前分支、remote、安装或运行结果，以及任何报错。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-01-fork.png" alt="Bornforthis 用手摇复制台复刻原始 Skill 仓库"><figcaption>把“复制”画成一个看得懂的动作：原始仓库 → 独立仓库 → 跑通。</figcaption></figure></div>
+      </div>
+      <span class="page-no">02</span>
+    </section>
+
+    <section class="slide" id="v4-03">
+      <div class="v4-shell method-grid">
+        <div class="method-copy">
+          <span class="part-label">02 学习结构</span>
+          <div class="method-num">02</div>
+          <h2>让 AI 学习仓库结构</h2>
+          <p>把链接给 AI，让它搞清楚哪些文件定义了 IP 形象、画风、Prompt 模板。产出一份“需要改的清单”。</p>
+          <div class="fact-strip"><span>IP 定义</span><span>画风 DNA</span><span>Prompt 模板</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 02 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m02">复制</button></summary><code id="m02">把这个 Skill 全部学习一遍，不要落下任何内容：【Skill 本地绝对路径】。搞清楚哪些文件定义 IP 形象、画风、Prompt 模板、参考图、示例、README 与代理入口。输出“文件｜作用｜是否需要修改｜原因”的清单，并区分通用方法论与原 IP 专属内容。此阶段只分析，不修改。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-02-structure.png" alt="Bornforthis 用放大镜拆解 Skill 文件职责"><figcaption>不是扫一眼目录，而是逐项找到 IP 定义、画风 DNA 与 Prompt 模板。</figcaption></figure></div>
+      </div>
+      <span class="page-no">03</span>
+    </section>
+
+    <section class="slide alt" id="v4-04">
+      <div class="v4-shell method-grid stack">
+        <div class="method-copy">
+          <span class="part-label yellow">03 给参考图</span>
+          <div class="method-num">03</div>
+          <h2>给 AI 满意的参考图</h2>
+          <p>直接给成品图。AI 看图比看文字准确 10 倍。先用 AI 生成多版本，选到满意的再给。</p>
+          <div class="fact-strip"><span>看图比看字准</span><span>脸部锚点</span><span>全身锚点</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 03 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m03">复制</button></summary><code id="m03">这是我满意的 IP 成品参考图：【图片绝对路径列表】。请逐张分析清晰度、脸部特征、年龄、比例、画风、服装干扰、背景干扰与配饰依赖；选出最适合长期生图的脸部锚点和全身锚点，并明确每张图负责锁定什么。不要把背景、衣服或可拆配饰当成永久身份。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-03-references.png" alt="Bornforthis 选定脸部锚点和全身锚点"><figcaption>一张锁脸与笔触，一张锁成年体态；背景、服装和配饰不进入身份锁。</figcaption></figure></div>
+      </div>
+      <span class="page-no">04</span>
+    </section>
+
+    <section class="slide" id="v4-05">
+      <div class="v4-shell method-grid">
+        <div class="method-copy">
+          <span class="part-label">04 写 Prompt</span>
+          <div class="method-num">04</div>
+          <h2>AI 提炼视觉特征 + 写 Prompt</h2>
+          <p>分析参考图，提炼 IP 外形、画风关键词和禁忌项，写成标准 Prompt 模板。每个 IP 都要找到“一个词识别点”。</p>
+          <div class="fact-strip"><span>风格</span><span>细节</span><span>特征</span><span>主题</span><span>标签</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 04 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m04">复制</button></summary><code id="m04">基于【IP 参考图路径】，提炼固定外形、年龄与头身比、一词识别点、辅助识别链、可变服装和配饰、画风关键词与禁忌项。把结果写成标准 Prompt 模板，包含：Reference Roles、Identity Lock、Scene Variables、Style DNA、Composition、Forbidden 和输出规格。判断标准：遮住文字、衣服和配饰后仍能认出角色。先输出模板，不生成图片。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-04-prompt.png" alt="放大镜提炼 Bornforthis 的外形、画风与识别点"><figcaption>把“分析参考图”变成直观画面：放大固定特征，同时写下风格、细节与禁忌。</figcaption></figure></div>
+      </div>
+      <span class="page-no">05</span>
+    </section>
+
+    <section class="slide alt" id="v4-06">
+      <div class="v4-shell method-grid reverse">
+        <div class="method-copy">
+          <span class="part-label yellow">05 试生成</span>
+          <div class="method-num">05</div>
+          <h2>试生成 + 确认风格</h2>
+          <p>第一次大概率跑偏——正常。加上 reference image 后第二次就对了。生图必须带参考图，纯文字 Prompt 不够稳。</p>
+          <div class="fact-strip"><span>第一次跑偏</span><span>加参考图</span><span>对了！</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 05 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m05">复制</button></summary><code id="m05">请同时带上【脸部参考图】和【全身参考图】，使用【标准 Prompt 模板】生成 1 张测试图。只验证 IP 身份与核心画风：脸、发型、年龄比例、一词识别点、背景、材质和配饰。若跑偏，列出失败项，只加强这些约束并再次传入 reference image 生成第二版；先不要批量生成。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-05-test.png" alt="Bornforthis 从第一次跑偏到加入参考图后校准成功"><figcaption>错误结果打叉，补上双参考图，再对照正确角色打勾。</figcaption></figure></div>
+      </div>
+      <span class="page-no">06</span>
+    </section>
+
+    <section class="slide" id="v4-07">
+      <div class="v4-shell method-grid stack">
+        <div class="method-copy">
+          <span class="part-label">06 批量生成</span>
+          <div class="method-num">06</div>
+          <h2>批量生成示例图</h2>
+          <p>风格确认后，一次性生成 8 张不同概念的示例图替换原版。</p>
+          <div class="fact-strip"><span>8 张！</span><span>批量出图</span><span>不同概念</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 06 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m06">复制</button></summary><code id="m06">风格已经确认。请先设计 8 条彼此不同的示例图 Shot List，覆盖不同主题、动作、构图、服装与道具；然后逐张生成 8 张独立图片替换原版示例。每次都传入同一组 reference image 并使用同一 Identity Lock。逐图保存编号文件，完成角色、风格、背景、构图、文字与配饰 QA。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-06-batch.png" alt="Bornforthis 用印刷机批量生成八张不同概念的示例图"><figcaption>不是同一姿势换背景，而是用 8 个不同场景压力测试身份与画风。</figcaption></figure></div>
+      </div>
+      <span class="page-no">07</span>
+    </section>
+
+    <section class="slide alt" id="v4-08">
+      <div class="v4-shell method-grid reverse">
+        <div class="method-copy">
+          <span class="part-label yellow">07 改写文件</span>
+          <div class="method-num">07</div>
+          <h2>改写所有 Skill 文件</h2>
+          <p>SKILL.md、IP 定义、风格 DNA、Prompt 模板、README 全部改成新 IP。只改跟风格相关的文件。</p>
+          <div class="fact-strip"><span>全部改写</span><span>旧 → 新</span><span>只改风格相关</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 07 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m07">复制</button></summary><code id="m07">测试与示例已确认。请创建全新的【新 Skill 名称】，不要直接修改原 Skill。改写所有风格相关文件，包括 SKILL.md、IP 定义、风格 DNA、Prompt 模板、README、agents 配置、构图、QA、参考图和示例；保留通用工作流。完成后扫描旧 IP 名、旧颜色、旧路径、旧参考图与旧 Prompt 残留。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-07-rewrite.png" alt="Bornforthis 把原角色的风格文件成组替换成新 IP 文件"><figcaption>通用工作流保留；角色、画风、Prompt、QA 与示例要成组替换。</figcaption></figure></div>
+      </div>
+      <span class="page-no">08</span>
+    </section>
+
+    <section class="slide" id="v4-09">
+      <div class="v4-shell method-grid">
+        <div class="method-copy">
+          <span class="part-label">08 推送</span>
+          <div class="method-num">08</div>
+          <h2>推送到 GitHub · 完成</h2>
+          <p>commit + push。从此拥有自己的专属 IP 配图系统——写任何文章，一句话生成风格统一的配图。</p>
+          <div class="fact-strip"><span>Push ↑</span><span>完成！</span></div>
+          <details class="method-prompt"><summary class="prompt-head"><span>小白直接复制 · 08 <em>点击展开</em></span><button class="copy-btn" data-copy-target="m08">复制</button></summary><code id="m08">请在【新 Skill 仓库路径】只提交本次新 IP Skill 的相关文件，commit 信息写为【提交说明】，然后推送到 GitHub 的【分支】。再把同一版本安装到【本机 Skills 目录】，核对仓库版、本机安装版与远端分支完全一致。最后用【真实文章路径】调用新 Skill，输出配图路径、插入位置与 QA 结果。</code></details>
+        </div>
+        <div class="method-visual"><figure class="result-card"><img src="assets/method-08-push.png" alt="Bornforthis 把新 Skill 推送、安装并用于文章配图"><figcaption>推送、安装、真实文章调用，组成可重复使用的最终闭环。</figcaption></figure></div>
+      </div>
+      <span class="page-no">09</span>
+    </section>
+
+    <section class="slide chapter-break" id="v4-10"><div class="v4-shell"><div class="chapter-kicker">PART 2</div><div><span class="part-label yellow">BORNFORTHIS · REAL CASE</span><h2>接下来，打开我的真实操作记录</h2><p>前面的 8 步讲清了方法。下面只讲这次 Bornforthis IP 插图 Skill 的真实改造：保留真实返工、真实文件、真实提交与真实文章结果。</p><div class="fact-strip"><span>只聚焦 IP 插图</span><span>保留真实返工</span><span>展示真实结果</span></div></div></div><span class="page-no">10</span></section>
+
+    <section class="slide" id="v4-11"><div class="v4-shell evidence-layout"><div class="evidence-copy"><span class="part-label">CASE 01 · 安装母版</span><h2 style="margin-top:1rem">我先安装原版 Skill，存在就更新</h2><div class="actual-chat"><div class="user-line">“安装这个 Skill：ian-xiaohei-illustrations，如果存在就更新！”</div><div class="result-line">得到：原版 Skill 保留在独立目录，作为后续结构与工作流母版。</div></div><div class="fact-strip"><span>原版不动</span><span>独立安装路径</span><span>可继续更新上游</span></div></div><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 01</span><button class="copy-btn" data-copy-target="c01">复制提示词</button></div><code id="c01">安装这个 Skill：【原 Skill GitHub 链接】。如果本地已经存在，先检查并更新到最新版本。保留原目录与全部上游文件，不要直接在原 Skill 中改我的 IP。完成后报告实际安装路径、版本或 commit、目录树和错误信息。</code><div class="receipt-foot"><span><b>输入</b> GitHub 链接</span><span><b>验收</b> 原版目录保持独立</span></div></div></div><span class="page-no">11</span></section>
+
+    <section class="slide alt" id="v4-12"><div class="v4-shell evidence-layout flip"><div class="evidence-copy"><span class="part-label">CASE 02 · 学透结构</span><h2 style="margin-top:1rem">我明确要求“全部学习，不漏内容”</h2><div class="actual-chat"><div class="user-line">“把这个 Skill 全部学习一遍，不要落下任何内容。搞清楚哪些文件定义 IP、画风、Prompt。”</div><div class="result-line">得到：风格文件替换清单，区分必须改写和应保留的通用方法论。</div></div><div class="fact-strip"><span>SKILL.md</span><span>agents/openai.yaml</span><span>references/*</span><span>README</span><span>assets/examples</span></div></div><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 02</span><button class="copy-btn" data-copy-target="c02">复制提示词</button></div><code id="c02">完整阅读【原 Skill 的 SKILL.md 绝对路径】以及该目录下所有文件，不遗漏内容。识别哪些文件定义 IP 外形、画风、颜色、Prompt、构图、QA、示例、README 和代理入口。输出：文件路径｜作用｜方法论或品牌专属｜新 Skill 是否修改｜原因。最后给出“只改风格相关文件”的清单。此阶段只分析，不修改。</code><div class="receipt-foot"><span><b>产出</b> 文件改造清单</span><span><b>验收</b> 所有文件均被覆盖</span></div></div></div><span class="page-no">12</span></section>
+
+    <section class="slide" id="v4-13"><div class="v4-shell evidence-layout"><div class="evidence-copy"><span class="part-label">CASE 03 · 确定角色锚点</span><h2 style="margin-top:1rem">我提供两张图，不让一张图承担所有职责</h2><p style="margin-top:1rem">近景图负责锁定脸、蓝碎发、黄鼻点与蜡笔笔触；全身图负责锁定年轻成年比例、动作和白色贴纸边。</p><div class="fact-strip"><span>脸部锚点</span><span>全身锚点</span><span>不继承黄底</span><span>不固化耳机 / 夹克</span></div></div><div class="compare"><figure><img src="assets/reference-face.webp" alt="Bornforthis 脸部参考图"><figcaption>02-headphone-earcup.png · 身份与近景笔触</figcaption></figure><figure><img src="assets/reference-fullbody.webp" alt="Bornforthis 全身参考图"><figcaption>16-personal-brand-hero.png · 成年体态与完成度</figcaption></figure></div></div><div class="v4-shell" style="margin-top:1rem"><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 03</span><button class="copy-btn" data-copy-target="c03">复制提示词</button></div><code id="c03">分析我提供的所有候选角色图：【图片路径列表】。选择 1 张脸部身份锚点和 1 张成年全身锚点，逐张说明保留或淘汰理由。明确每张图负责锁定什么；不要把背景、服装或可拆配饰当成永久身份。最后输出两条推荐绝对路径。</code><div class="receipt-foot"><span><b>结果</b> 两张锚点各司其职</span><span><b>验收</b> 去掉配饰仍可识别</span></div></div></div><span class="page-no">13</span></section>
+
+    <section class="slide alt" id="v4-14"><div class="v4-shell evidence-layout flip"><div class="evidence-copy"><span class="part-label">CASE 04 · 提炼身份与画风</span><h2 style="margin-top:1rem">最终一词识别点：黄腮红</h2><p style="margin-top:1rem">稳定身份链是“蓝碎发 + 白脸 + 黄腮红”。耳机、蓝夹克、相机、相机包、笔记本都属于按场景选择的可变项。</p><div class="big-quote">黄腮红</div><div class="fact-strip"><span>年轻成年男性</span><span>4.5–5 头身</span><span>纯白画布</span><span>蜡笔 + 彩铅</span></div></div><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 04</span><button class="copy-btn" data-copy-target="c04">复制提示词</button></div><code id="c04">基于【脸部锚点】与【全身锚点】，提炼 IP【名称】的固定身份。必须输出：一词识别点；辅助识别链；年龄与头身比；固定脸部和发型；可变服装 / 配饰；画风关键词；禁忌项；可用于生图的英文 Identity Lock。判断标准：遮住文字、衣服和配饰仍可认出角色。不要生成图片。</code><div class="receipt-foot"><span><b>实际结果</b> 黄腮红</span><span><b>禁止</b> 用耳机承担身份</span></div></div></div><span class="page-no">14</span></section>
+
+    <section class="slide" id="v4-15"><div class="v4-shell"><span class="part-label red">CASE 05 · 真实返工</span><h2 style="margin-top:1rem">我没有一次成功：V1 → V2 → V3</h2><div class="version-grid"><div class="version"><img src="assets/v1-overview.webp" alt="Bornforthis V1 14 张示例总览"><div class="version-head"><strong>V1</strong><span>耳机 = 身份</span></div><p>14 张都固定黄底、耳机与蓝夹克；角色像了，但身份锁错了。</p></div><div class="version"><img src="assets/v2-overview.webp" alt="Bornforthis V2 14 张白底示例总览"><div class="version-head"><strong>V2</strong><span>WHITE CANVAS</span></div><p>改为白底与黄腮红；只有降噪主题使用耳机，但三色被误写成封闭色板。</p></div><div class="version"><img src="assets/v3-overview.webp" alt="Bornforthis V3 14 张开放色板示例总览"><div class="version-head"><strong>V3</strong><span>OPEN PALETTE</span></div><p>品牌色负责识别，木色、绿色、青色、紫色等内容色负责表达。</p></div></div><div class="fact-strip"><span>V1：配饰固化</span><span>V2：色板过窄</span><span>V3：最终规则</span><span>V3 全部重新生成</span></div></div><span class="page-no">15</span></section>
+
+    <section class="slide alt" id="v4-16"><div class="v4-shell evidence-layout"><div class="evidence-copy"><span class="part-label">CASE 06 · 生成测试</span><h2 style="margin-top:1rem">14 张用来压力测试，不是凑作品集</h2><p style="margin-top:1rem">不同动作、服装、道具、隐喻和内容色一起变化，才能确认角色真的跨场景稳定。</p><div class="fact-strip"><span>14 / 14 独立文件</span><span>1672 × 941</span><span>sRGB</span><span>精确白色四角</span><span>唯一耳机图：降噪</span></div></div><figure class="result-card"><img src="assets/v3-overview.webp" alt="Bornforthis V3 14 张示例图总览"><figcaption>V3 QA：14 张均保持蓝碎发、白脸、黄鼻点和两枚黄腮红；服装按场景轮换。</figcaption></figure></div><div class="v4-shell" style="margin-top:1rem"><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 05</span><button class="copy-btn" data-copy-target="c05">复制提示词</button></div><code id="c05">使用已确认的 IP 定义与 Style DNA，先设计 14 条不同的 Shot List，再逐张生成 14 张独立 16:9 示例图。每次都同时传入脸部和全身锚点，锁定同一 Identity；覆盖不同动作、隐喻、服装、道具与内容辅助色。每张只解释一个核心概念，保存编号文件，并逐图检查身份、白底、画风、颜色、构图、文字和配饰纪律。</code><div class="receipt-foot"><span><b>先做</b> Shot List</span><span><b>再做</b> 逐张生成 + QA</span></div></div></div><span class="page-no">16</span></section>
+
+    <section class="slide" id="v4-17"><div class="v4-shell evidence-layout flip"><div class="evidence-copy"><span class="part-label">CASE 07 · 改写、发布、安装</span><h2 style="margin-top:1rem">新 Skill 真的独立存在，而且三处一致</h2><div class="tree"><code>bornforthis-illustrations/
+├── SKILL.md · README.md · agents/openai.yaml
+├── references/
+│   ├── bornforthis-ip.md · style-dna.md
+│   ├── prompt-template.md · composition-patterns.md
+│   └── qa-checklist.md
+└── assets/references + assets/examples</code></div><div class="fact-strip"><span>GitHub main</span><span>本地仓库</span><span>~/.codex/skills</span><span>diff 无差异</span></div></div><div class="prompt-receipt"><div class="prompt-head"><span>真实发布证据</span><button class="copy-btn" data-copy-target="c06">复制提示词</button></div><code id="c06">仓库：/Users/huangjiabao/GitHub/CodexSkills/skills/bornforthis-illustrations
+安装：/Users/huangjiabao/.codex/skills/bornforthis-illustrations
+远端：github.com/AndersonHJB/CodexSkills · main
+commit：b27483b319cb3e7010a125b9d95b4c5433e76a1f
+message：feat: add Bornforthis illustration skill
+结果：25 个文件；仓库版与安装版目录级 diff 无差异；两张安装锚点与工作区原图 SHA-256 一致。</code><div class="receipt-foot"><span><b>风格层</b> Skill · IP · DNA · Prompt · QA</span><span><b>资产层</b> 双锚点 · 14 示例 · 总览</span></div></div></div><span class="page-no">17</span></section>
+
+    <section class="slide alt" id="v4-18"><div class="v4-shell evidence-layout"><div class="evidence-copy"><span class="part-label">CASE 08 · 真实调用</span><h2 style="margin-top:1rem">最后用 demo/01.md 做正向实测</h2><div class="actual-chat"><div class="user-line">“接下来，使用我的这个 Skill。为这篇文章 demo/01.md 生成配图。”</div><div class="result-line">得到：自动理解文章，选择 6 个认知锚点，交付 6 张配图、建议插入位置与 Markdown；原文没有被修改。</div></div><div class="fact-strip"><span>真实 Markdown</span><span>6 张独立配图</span><span>建议插入位置</span><span>逐图 QA</span></div></div><figure class="result-card"><img src="assets/article-test-overview.webp" alt="Bornforthis Skill 对真实文章的 6 张配图实测"><figcaption>自动覆盖：法则过载、跨域生长、实用进步、一万小时迷思、真实问题、七关键词飞轮。</figcaption></figure></div><div class="v4-shell" style="margin-top:1rem"><div class="prompt-receipt"><div class="prompt-head"><span>可直接复刻 · 07</span><button class="copy-btn" data-copy-target="c07">复制提示词</button></div><code id="c07">使用我的 Skill【$新 Skill 名称】，为文章【Markdown 绝对路径】生成配图。先完整阅读文章并提炼真正需要视觉化的认知锚点，先给出数量、插入位置、视觉隐喻、角色动作和构图方案；再逐张生成并保存到【输出目录】。默认不改文章正文。最后逐图 QA，并输出“文件路径 → 插入位置 → alt 文本”。</code><div class="receipt-foot"><span><b>真实结果</b> 6 张 1672 × 941</span><span><b>验收</b> 白底 · 黄腮红 · 配饰不固化</span></div></div></div><span class="page-no">18</span></section>
+
+    <section class="slide chapter-break" id="v4-19"><div class="v4-shell"><div class="chapter-kicker">PART 3</div><div><span class="part-label yellow">BEGINNER COPY KIT</span><h2>现在轮到你复刻</h2><p>先准备资料，再逐条复制 01–08。不要一开始就要求“直接生成 14 张”，也不要在测试通过之前改写全部文件。</p></div></div><span class="page-no">19</span></section>
+
+    <section class="slide" id="v4-20"><div class="v4-shell"><span class="part-label red">COPY KIT · 资料包</span><h2 style="margin-top:1rem">开始前，你只需准备这些</h2><div class="kit-grid"><article class="kit-card"><b>01 · 身份</b><h3>角色参考</h3><p>IP 名称；清楚脸部图；成年全身图；固定外形；一词识别点。</p></article><article class="kit-card"><b>02 · 品牌</b><h3>视觉规则</h3><p>背景；品牌色与职责；字体；气质；画风材质；禁忌。</p></article><article class="kit-card"><b>03 · 工程</b><h3>交付位置</h3><p>原 Skill 链接；新 Skill 名称；本地安装路径；GitHub 仓库；实测文章。</p></article></div><div class="prompt-receipt" style="margin-top:1.4rem"><div class="prompt-head"><span>复制：资料审计</span><button class="copy-btn" data-copy-target="c08">复制提示词</button></div><code id="c08">我要把已有插图 Skill 改造成自己的独立 IP Skill。开始前不要生成图片。请按“必需 / 建议 / 可后补”检查我是否提供：IP 名称、脸部图、成年全身图、品牌色及职责、字体、气质、背景、固定特征、可变服装与配饰、禁忌、目标场景、示例数量、安装位置和发布仓库。对缺失或冲突项逐项提问，不要脑补。</code><div class="receipt-foot"><span><b>第一步</b> 先补齐资料</span><span><b>不要</b> 直接批量生图</span></div></div></div><span class="page-no">20</span></section>
+
+    <section class="slide alt" id="v4-21"><div class="v4-shell evidence-layout flip"><div class="evidence-copy"><span class="part-label">COPY KIT · 验收</span><h2 style="margin-top:1rem">完成标准不是“看起来挺像”</h2><div class="method-points"><div class="method-point"><b>1</b><span>遮住文字、衣服和配饰仍能认出 IP。</span></div><div class="method-point"><b>2</b><span>不同场景中年龄、脸、发型和一词识别点稳定。</span></div><div class="method-point"><b>3</b><span>配饰不固化；颜色规则能解释且不过度限制。</span></div><div class="method-point"><b>4</b><span>新 Skill 独立安装，旧 IP 残留扫描通过。</span></div><div class="method-point"><b>5</b><span>真实文章调用后仍能服务内容。</span></div></div></div><div class="prompt-receipt"><div class="prompt-head"><span>复制：最终 QA</span><button class="copy-btn" data-copy-target="c09">复制提示词</button></div><code id="c09">对新 Skill 做最终验收。逐项核验：角色身份、年龄比例、一词识别点、背景、画风、品牌色职责、辅助色语义、构图、文字、服装与配饰纪律、旧 IP 残留、内部路径、示例数量、本地安装、Git 提交和真实文章实测。每项必须给出文件或图片证据；没有实际查看证据时不得宣称通过。最后列出“已通过 / 待修复 / 阻塞”。</code><div class="receipt-foot"><span><b>核心</b> 证据驱动</span><span><b>结果</b> 可复用而非一次性</span></div></div></div><span class="page-no">21</span></section>
+
+    <section class="slide" id="v4-22"><div class="v4-shell v4-hero"><div><span class="part-label yellow">DONE · 8 + REAL CASE</span><h2>先学完整方法，<br>再看真实案例，<br>最后自己复刻。</h2><p class="v4-sub">你不需要先懂 Skill；照着 01–08 操作，每一步都看得到输入、Prompt、结果和验收。</p><div class="fact-strip"><span>完整方法 8 步</span><span>Bornforthis 真实证据链</span><span>资料与 QA 工具包</span></div></div><figure class="result-card"><img src="assets/end-to-end-validation.webp" alt="Bornforthis IP Skill 从参考图到文章配图的完整闭环"><figcaption>最终闭环：参考图 → 身份与画风规则 → 示例压力测试 → 新 Skill → 真实文章配图。</figcaption></figure></div><span class="page-no">22</span></section>
+  </main>
+
+  <template id="archived-deck-v3">
+    <section class="slide hero" id="n1">
+      <div class="eyebrow">Bornforthis · BEGINNER REBUILD GUIDE</div>
+      <div class="hero-grid">
+        <div>
+          <p class="kicker">不是“换个角色名”</p>
+          <h1>把别人的插图 Skill<br>改成你的<strong>专属 IP 系统</strong></h1>
+          <p class="lead">结合真实的 Bornforthis 改造过程，重排为 00→11 的小白复刻路线。每一步都有输入、可复制提示词、产出物与验收标准。</p>
+          <div class="chips"><span>白底</span><span>蓝 60%</span><span>黄 30%</span><span>红 10%</span><span>一词识别点：黄腮红</span></div>
+        </div>
+        <div class="hero-art"><img src="assets/hero-skill-transformation.webp" alt="从原版 Skill 到 Bornforthis IP Skill 的转化示意图"></div>
+      </div>
+      <span class="page-no">01</span>
+    </section>
+
+    <section class="slide" id="n2">
+      <div class="eyebrow">THE WHOLE ROUTE</div>
+      <h2>先看全貌：12 步，6 类交付物</h2>
+      <p class="lead">用“编号步骤 + 立刻看到结果”的节奏讲清方法，并补上可直接复刻的 Prompt 与验收门槛。</p>
+      <div class="roadmap-grid">
+        <div class="roadmap-item"><b>00</b><span>备齐资料</span></div><div class="roadmap-item"><b>01</b><span>安装原版</span></div>
+        <div class="roadmap-item"><b>02</b><span>学透结构</span></div><div class="roadmap-item"><b>03</b><span>选择锚点</span></div>
+        <div class="roadmap-item"><b>04</b><span>提炼角色</span></div><div class="roadmap-item"><b>05</b><span>写风格 DNA</span></div>
+        <div class="roadmap-item"><b>06</b><span>写 Prompt 模板</span></div><div class="roadmap-item"><b>07</b><span>生成 14 张</span></div>
+        <div class="roadmap-item"><b>08</b><span>QA 与 V1–V3</span></div><div class="roadmap-item"><b>09</b><span>创建新 Skill</span></div>
+        <div class="roadmap-item"><b>10</b><span>安装并发布</span></div><div class="roadmap-item"><b>11</b><span>真实文章实测</span></div>
+      </div>
+      <div class="deliverable-strip">
+        <div class="deliverable"><b>01</b>IP 定义</div><div class="deliverable"><b>02</b>风格 DNA</div><div class="deliverable"><b>03</b>Prompt 模板</div>
+        <div class="deliverable"><b>04</b>14 张样图</div><div class="deliverable"><b>05</b>独立 Skill</div><div class="deliverable"><b>06</b>文章实测</div>
+      </div>
+      <span class="page-no">02</span>
+    </section>
+
+    <section class="slide" id="n3">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 00 · 先准备，后生成</div><h2>把输入资料一次备齐</h2><p class="lead">缺少“固定特征、可变项、禁忌项”，AI 很容易把一件衣服误认成角色身份。</p>
+          <div class="io-grid"><div class="io-card"><b>你要准备</b><p>IP 名称；近景脸部图；成年全身图；品牌色/比例；字体；气质；固定特征；可变服装配件；禁忌；使用场景；仓库。</p></div><div class="io-card check"><b>验收</b><p>AI 先回传“已收到 / 缺失 / 存疑”清单，不开始生图，不替你脑补关键身份。</p></div></div>
+          <p class="micro">Bornforthis 实例：白底；蓝黄红是主品牌体系但不是封闭色板；耳机、蓝夹克、相机包、相机、笔记本均非固定身份。</p></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：资料审计</b><button class="copy-btn" data-copy-target="p00">复制提示词</button></div><code class="prompt-text" id="p00">我要把一个已有插图 Skill 改造成自己的独立 IP Skill，不覆盖原 Skill。开始前先不要生成图片。请列出我必须提供的数据清单，并按“必需 / 建议 / 可后补”分类。至少检查：IP 名称、近景脸部参考图、成年全身参考图、品牌色及比例、字体、气质关键词、背景规则、固定外形、可变服装与配饰、禁忌项、目标内容场景、示例图数量、安装目录与发布仓库。对缺失或冲突项逐项提问，不擅自设定；最后输出一张可勾选的资料验收表。</code><div class="prompt-note">把你的真实路径和品牌数据补进回复即可。</div></div>
+      </div><span class="page-no">03</span>
+    </section>
+
+    <section class="slide" id="n4">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 01 · 保留上游</div><h2>安装原版，但不在原版里改</h2><p class="lead">原 Skill 是方法论母版；你的 Skill 必须是全新目录，后续才能独立更新和回滚。</p>
+          <div class="io-grid"><div class="io-card"><b>输入</b><p>原 Skill GitHub 链接、期望安装目录。</p></div><div class="io-card check"><b>输出 / 验收</b><p>报告真实安装路径、版本或 commit、文件数量；若已存在则先比较再更新。</p></div></div>
+          <div class="mini-command">原版：github.com/helloianneo/ian-xiaohei-illustrations</div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：安装原版</b><button class="copy-btn" data-copy-target="p01">复制提示词</button></div><code class="prompt-text" id="p01">安装这个 Skill：【原 Skill GitHub 链接】。如果本地已经存在，先对比远端版本并更新。完整保留上游目录名和文件，不要在原目录里做我的 IP 改造。完成后告诉我：1）实际安装路径；2）当前版本或 commit；3）目录树和文件数量；4）更新了什么；5）是否存在未解决错误。此阶段只安装和核验，不改风格文件。</code><div class="prompt-note">关键句：不要在原目录里改。它把“学习母版”和“创建新品牌”隔开。</div></div>
+      </div><span class="page-no">04</span>
+    </section>
+
+    <section class="slide" id="n5">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 02 · 先读完再动手</div><h2>学透结构，找出真正控制风格的文件</h2><p class="lead">不要只看 SKILL.md。角色定义、构图规则、负面词和示例往往散落在 references、assets、README 与 agent 配置中。</p>
+          <div class="io-grid"><div class="io-card"><b>产出</b><p>一份“文件 → 职责 → 是否改 → 理由”的改造清单。</p></div><div class="io-card check"><b>验收</b><p>所有文件已覆盖；方法论骨架与品牌专属内容被明确拆开。</p></div></div>
+          <div class="pit-grid"><div class="pit"><b>保留</b><p>工作流、工具约束、QA 机制。</p></div><div class="pit"><b>改写</b><p>IP、画风、颜色、Prompt、示例。</p></div></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：完整学习</b><button class="copy-btn" data-copy-target="p02">复制提示词</button></div><code class="prompt-text" id="p02">完整阅读【原 Skill 的 SKILL.md 绝对路径】以及该 Skill 目录下的所有文件，不要遗漏任何内容。识别哪些文件定义了：IP 外形、画风、品牌色、构图、文字、Prompt 模板、负面约束、QA、示例图、README 和代理入口。输出表格：文件路径｜文件作用｜属于方法论还是品牌专属｜新 Skill 是否需要修改｜修改理由。最后给出“只改风格相关文件”的白名单与“必须原样保留”的灰名单。此阶段只分析，不修改文件。</code><div class="prompt-note">先拿到清单，再进入视觉改造；这一步决定后面会不会漏文件。</div></div>
+      </div><span class="page-no">05</span>
+    </section>
+
+    <section class="slide" id="n6">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 03 · 两张锚点，各司其职</div><h2>选“脸部锚点”与“成年全身锚点”</h2><p class="lead">近景图负责身份，全身图负责年龄、头身比和肢体。不要让一张图同时承担所有职责。</p>
+          <div class="compare"><figure><img src="assets/reference-face.webp" alt="Bornforthis 近景脸部锚点"><figcaption><b>脸部锚点</b><br>眉毛、眼型、发型、眼镜</figcaption></figure><figure><img src="assets/reference-fullbody.webp" alt="Bornforthis 成年全身锚点"><figcaption><b>全身锚点</b><br>成年感、头身比、手脚比例</figcaption></figure></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：选择参考图</b><button class="copy-btn" data-copy-target="p03">复制提示词</button></div><code class="prompt-text" id="p03">分析我提供的全部候选角色图：【候选图路径列表】。从中选择：A）1 张最适合锁定脸部身份的近景图；B）1 张最适合锁定成年体态与全身比例的全身图。逐张说明保留或淘汰理由，尤其检查年龄漂移、脸部清晰度、头身比、服装干扰和背景干扰。明确两张锚点各自负责什么；不要把衣服、背景或可拆配饰当成永久身份。最后输出推荐的两条绝对路径。</code><div class="prompt-note">Bornforthis 实际选用：02-headphone-earcup.png + 16-personal-brand-hero.png。</div></div>
+      </div><span class="page-no">06</span>
+    </section>
+
+    <section class="slide" id="n7">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 04 · 一个词识别点</div><h2>遮住衣服，也要认得出是谁</h2><p class="lead">把“像不像”拆成可执行身份链：一个主识别点 + 若干辅助识别特征 + 明确禁忌。</p>
+          <div class="big-quote">黄腮红</div><div class="chips"><span>短蓝碎发</span><span>纸白方圆脸</span><span>小黄鼻点</span><span>两枚黄腮红</span><span>年轻成年比例</span></div>
+          <div class="io-grid"><div class="io-card"><b>输出</b><p>IP 定义草案 + identity lock 段落。</p></div><div class="io-card check"><b>验收</b><p>摘掉耳机、换掉蓝夹克后，识别链仍成立。</p></div></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：提炼角色</b><button class="copy-btn" data-copy-target="p04">复制提示词</button></div><code class="prompt-text" id="p04">基于两张锚点【脸部图路径】与【全身图路径】，提炼 IP【IP 名称】的视觉身份。必须输出：1）“一个词识别点”，只能是稳定外形而不是服装或配饰；2）辅助识别链；3）成年年龄与头身比例；4）固定外形；5）可变服装/配饰；6）画风关键词；7）禁忌项；8）可直接嵌入生图 Prompt 的英文 identity lock。判断标准：遮住衣服、拿掉耳机和道具，仍能辨认角色。只做分析与文字定义，不生成图片。</code><div class="prompt-note">一词识别点越短，越容易在后续每条 Prompt 中重复锁定。</div></div>
+      </div><span class="page-no">07</span>
+    </section>
+
+    <section class="slide" id="n8">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 05 · 把审美变成规则</div><h2>写成可执行的品牌 Style DNA</h2><p class="lead">“可爱、有品质、有温度”还不够；要落到背景、色彩职责、材质、字体和禁止项。</p>
+          <div class="palette"><div class="swatch blue"><b>60%</b><span>#2B7FD8</span></div><div class="swatch yellow"><b>30%</b><span>#F4D758</span></div><div class="swatch red"><b>10%</b><span>#E84A5F</span></div></div>
+          <p class="micro">白底固定；品牌三色按品牌色内部占比理解，不是封闭色板；内容需要的肤色、植物色、木色可自然加入。</p></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：风格 DNA</b><button class="copy-btn" data-copy-target="p05">复制提示词</button></div><code class="prompt-text" id="p05">把以下品牌数据改写为可执行的 Style DNA：IP 名称【名称】；背景【白色】；主色【#2B7FD8 蓝 60%，标题/链接】；强调色【#F4D758 黄 30%，装饰/高亮】；点缀色【#E84A5F 红 10%，CTA/标签】；说明【这三色不是封闭色板，其他内容色按语义自然加入】；中文标题【汇文明朝体】；英文装饰【Fraunces】；手写注释【Caveat】；代码终端【Fira Code】；气质【可爱但有品质、手绘蜡笔感、有温度、不像 AI】。输出 MUST / SHOULD / AVOID 三层规则、颜色语义表、字体职责表、材质关键词和负面关键词。不要生成图。</code><div class="prompt-note">用 MUST / SHOULD / AVOID，让审美从形容词变成可验收规则。</div></div>
+      </div><span class="page-no">08</span>
+    </section>
+
+    <section class="slide" id="n9">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 06 · Prompt 模板化</div><h2>每次只换场景，不重写身份</h2><p class="lead">标准模板按“参考图职责 → 身份锁 → 场景变量 → 风格 → 色彩 → 构图文字 → 禁忌 → 输出”拼装。</p>
+          <div class="pipeline"><span>REFERENCES</span><i>→</i><span>IDENTITY</span><i>→</i><span>SCENE</span><i>→</i><span>STYLE</span><i>→</i><span>AVOID</span></div>
+          <div class="io-grid"><div class="io-card"><b>输出</b><p>整图生成模板、单点修复模板、角色加强模板。</p></div><div class="io-card check"><b>验收</b><p>身份区块在任何场景下都不被删改。</p></div></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：生成模板</b><button class="copy-btn" data-copy-target="p06">复制提示词</button></div><code class="prompt-text" id="p06">基于已确认的【IP 定义】和【Style DNA】，编写标准生图 Prompt 模板。模板必须依次包含：A）两张参考图及各自职责；B）不可删改的 identity lock；C）可替换的场景、动作、服装、配饰、隐喻变量；D）手绘蜡笔材质与“非 AI 感”；E）白底与品牌色语义；F）16:9 构图、安全区和文字规则；G）固定禁忌；H）输出格式。再提供“只改一个局部、不重画全图”的编辑模板，以及“角色不像时”的身份加强模板。用【方括号】标出所有需要用户替换的变量。</code><div class="prompt-note">变量只放在场景层；身份锁和风格 DNA 必须保持稳定。</div></div>
+      </div><span class="page-no">09</span>
+    </section>
+
+    <section class="slide" id="n10">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 07 · 压力测试</div><h2>14 张不是作品集，是测试矩阵</h2><p class="lead">覆盖不同动作、隐喻、服装、道具与内容色，才能验证角色是否真能跨场景稳定。</p>
+          <div class="media-card"><img src="assets/v3-overview.webp" alt="Bornforthis V3 14 张测试样图总览"></div>
+          <div class="chips"><span>身份稳定</span><span>成年比例</span><span>白底</span><span>服装可变</span><span>内容色开放</span></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：生成 14 张</b><button class="copy-btn" data-copy-target="p07">复制提示词</button></div><code class="prompt-text" id="p07">使用【我的新 IP 规则】设计并生成 14 张 16:9 示例图，用来压力测试身份与画风。先提交 14 条 shot list，每条写清：主题隐喻、角色动作、服装/配饰、主次色、构图和对应测试点；经一致性自检后再逐张生成。每次生图都必须同时传入脸部锚点与全身锚点，并使用同一 identity lock；耳机、蓝夹克、相机包、相机、笔记本都只能按场景选配。14 张要覆盖不同服装、道具、内容色与信息密度，不能只是同一姿势换背景。每张单独保存并编号，最后生成总览图。</code><div class="prompt-note">生成前先看 shot list，可提前发现“14 张其实都一样”的问题。</div></div>
+      </div><span class="page-no">10</span>
+    </section>
+
+    <section class="slide" id="n11">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 08 · QA 驱动迭代</div><h2>V1→V3，每一版只解决明确问题</h2><p class="lead">真实项目不是一次命中：V1 暴露限制，V2 修正固定配件与色板误读，V3 才形成稳定品牌规则。</p>
+          <div class="version-grid"><div class="version"><b>V1</b><p>先确认角色和蜡笔方向。</p></div><div class="version"><b>V2</b><p>取消耳机、蓝夹克等永久绑定。</p></div><div class="version"><b>V3</b><p>白底稳定；品牌色主导但内容色开放。</p></div></div>
+          <div class="io-card check"><b>逐图检查</b><p>身份、成年比例、白底、材质、色彩职责、构图、文字、配饰误绑定。</p></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 AI：逐图 QA</b><button class="copy-btn" data-copy-target="p08">复制提示词</button></div><code class="prompt-text" id="p08">逐张查看这 14 张图片，不要只读文件名。建立 QA 表：编号｜身份一致性｜成年比例｜白底｜手绘蜡笔感｜品牌色职责｜内容色是否自然｜构图安全区｜文字可读性｜是否把可变配饰误固定｜问题严重度｜修复动作。每张只列最影响结果的 1–3 个问题。需要修图时优先做“单目标局部编辑”，明确写出“只改什么、其他全部保持不变”；修后再次查看并记录 V1→V2→V3 的规则变化。没有视觉检查证据，不得宣称通过。</code><div class="prompt-note">QA 不是“好不好看”，而是逐项验证已经写下的规则。</div></div>
+      </div><span class="page-no">11</span>
+    </section>
+
+    <section class="slide" id="n12">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 09 · 创建全新 Skill</div><h2>复制方法论，重写品牌层</h2><p class="lead">只改跟风格相关的文件；原 Skill 保持可更新，新 Skill 获得独立名称、文档、参考图和 Prompt。</p>
+          <div class="tree"><code>bornforthis-illustrations/
+├── SKILL.md
+├── README.md
+├── agents/openai.yaml
+├── references/
+│   ├── bornforthis-ip-definition.md
+│   ├── style-dna.md
+│   └── prompt-template.md
+└── assets/  # 两张身份锚点</code></div>
+          <div class="chips"><span>原版不动</span><span>残留词扫描</span><span>路径验证</span></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：改写新 Skill</b><button class="copy-btn" data-copy-target="p09">复制提示词</button></div><code class="prompt-text" id="p09">以【原 Skill 路径】为方法论母版，创建全新的【新 Skill 名称】目录；禁止直接修改原 Skill。仅改写与品牌风格相关的文件，包括但不限于 SKILL.md、README、agents/openai.yaml、IP 定义、Style DNA、Prompt 模板、参考图和示例说明；通用工作流、工具规则与 QA 骨架保持一致。把已确认的 V3 规则写入新 Skill。完成后执行残留扫描，检查原 IP 名、旧品牌色、旧参考图路径和旧示例是否仍出现；再验证所有内部链接与资源路径。输出实际修改清单、保留清单和扫描结果。</code><div class="prompt-note">“仅改风格相关文件”不等于只改三份文档；README、agent 入口和资产引用也属于品牌层。</div></div>
+      </div><span class="page-no">12</span>
+    </section>
+
+    <section class="slide" id="n13">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 10 · 安装与发布</div><h2>本地能调用，GitHub 能追溯</h2><p class="lead">安装验证和 Git 发布都成功，才算从“文件夹”升级为真正可复用的 Skill。</p>
+          <div class="io-grid"><div class="io-card"><b>本地</b><p>Skill 可被发现、SKILL.md 可读、引用资源存在。</p></div><div class="io-card check"><b>远端</b><p>目标仓库 main 已推送；commit SHA 与变更清单可追溯。</p></div></div>
+          <div class="mini-command">目标示例：github.com/AndersonHJB/CodexSkills · main</div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：安装 + 推送</b><button class="copy-btn" data-copy-target="p10">复制提示词</button></div><code class="prompt-text" id="p10">安装新 Skill【新 Skill 目录或仓库地址】到本机技能目录，并验证系统能够发现它。然后把这套新 Skill 推送到【GitHub 仓库 URL】的【main】分支。操作前先检查 git status、当前分支、remote 和用户已有改动；只提交本次新 Skill 的相关文件，不覆盖无关内容。提交信息写清“新增【IP 名称】插图 Skill”。推送后返回：安装路径、验证结果、commit SHA、远端分支和变更文件列表。若权限或冲突阻塞，停止并明确报告，不做破坏性处理。</code><div class="prompt-note">发布前先看 git status；这是保护仓库里其他工作的最低门槛。</div></div>
+      </div><span class="page-no">13</span>
+    </section>
+
+    <section class="slide" id="n14">
+      <div class="step-layout">
+        <div><div class="step-badge">STEP 11 · 正向实测</div><h2>用真实文章，而不是样图自证</h2><p class="lead">真实内容会检验“文章理解、视觉隐喻、角色一致性、排版留白”能否同时成立。</p>
+          <div class="media-card"><img src="assets/article-test-overview.webp" alt="Bornforthis Skill 在真实文章中的四张配图总览"></div>
+          <div class="io-grid"><div class="io-card"><b>输入</b><p>文章 Markdown + 新 Skill。</p></div><div class="io-card check"><b>验收</b><p>不是插图数量越多越好；每张都对应明确认知锚点。</p></div></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制给 Codex：文章配图</b><button class="copy-btn" data-copy-target="p11">复制提示词</button></div><code class="prompt-text" id="p11">使用我的 Skill【$新 Skill 名称】，为文章【Markdown 绝对路径】生成配图。先完整阅读文章，提炼读者最需要被视觉化的认知锚点；先给出建议配图数量、每张对应段落、视觉隐喻、是否需要角色、构图与预留文字区，不要立刻批量生成。确认方案后逐张生成，全部使用新 Skill 的身份锁、Style DNA 与 Prompt 模板；每张保存到【输出目录】并逐图 QA。默认不改文章正文，最后给出“图片路径 → 建议插入位置 → alt 文本”的清单。</code><div class="prompt-note">真实实测是最终验收：Skill 要能服务内容，不只是稳定画一个角色。</div></div>
+      </div><span class="page-no">14</span>
+    </section>
+
+    <section class="slide" id="n15">
+      <div class="step-layout">
+        <div><div class="step-badge">ONE-SHOT · 会自动分阶段</div><h2>只想复制一次？用这条总控 Prompt</h2><p class="lead">它不会跳过关键检查点：每阶段先报告产出与风险，再进入下一阶段。</p>
+          <div class="deliverable-strip"><div class="deliverable"><b>输入</b>资料与路径</div><div class="deliverable"><b>定义</b>IP + DNA</div><div class="deliverable"><b>验证</b>14 张 + QA</div><div class="deliverable"><b>交付</b>Skill + Git</div></div>
+          <div class="callout"><b>真正的完成标准</b><p>换衣服、换道具、换主题后仍一眼认出；视觉规则可解释；文件可复用；真实文章可调用。</p></div></div>
+        <div class="prompt-panel"><div class="prompt-toolbar"><b>复制：全流程总控</b><button class="copy-btn" data-copy-target="pmaster">复制提示词</button></div><code class="prompt-text" id="pmaster">请把【原 Skill GitHub 链接】改造成我的全新独立 IP Skill【新 Skill 名称】，但绝对不要直接修改原 Skill。我的资料是：【IP 名称】【脸部参考图路径】【全身参考图路径】【品牌色与比例】【字体】【气质关键词】【固定特征】【可变服装配饰】【禁忌】【目标仓库】。按 00–11 分阶段执行：资料审计→安装原版→完整学习所有文件→选择双锚点→提炼“一词识别点”与 identity lock→写 Style DNA→写标准 Prompt 模板→设计并生成 14 张压力测试图→逐图 QA 并迭代到稳定版本→仅改写风格相关文件创建新 Skill→本地安装并推送 GitHub→用真实文章做正向实测。每阶段都必须输出：输入检查、实际产物、文件路径、验收结果、遗留风险；关键资料缺失时先问我，不得脑补；没有查看图片或文件证据时不得宣称通过。所有提示词、路径和规则都要保存在新 Skill 内，确保下一次可以直接复用。</code><div class="prompt-note">建议仍按单步 Prompt 操作；总控版适合你已经把资料整理完整之后。</div></div>
+      </div><span class="page-no">15</span>
+    </section>
+  </template>
+
+  <template id="archived-deck-old">
+    <section class="slide" id="s1" data-index="01" data-title="封面">
+      <div class="slide-inner hero-grid">
+        <div class="hero-copy reveal">
+          <span class="kicker">REAL PROJECT · PERSONAL IP SKILL</span>
+          <h1>从原版 Skill<br>到<span class="highlight">我的个人 IP</span></h1>
+          <p class="lead">以 Bornforthis 的真实改造过程为例：不是“换一张头像”，而是把角色身份、画风、Prompt、示例、QA 与安装发布一起做成可复用系统。</p>
+          <div class="hero-meta">
+            <span class="pill">15 屏教程</span><span class="pill yellow">14 张压力测试</span><span class="pill red">1 次文章前向验证</span>
+          </div>
+          <div class="hand" style="margin-top:1.4rem">← / → 翻页 · Space 下一页</div>
+        </div>
+        <div class="hero-art reveal d1"><img src="assets/hero-skill-transformation.webp" alt="Bornforthis 把原版角色替换为自己的个人 IP Skill"></div>
+      </div>
+    </section>
+
+    <section class="slide alt" id="s2" data-index="02" data-title="真实项目">
+      <div class="slide-inner">
+        <span class="kicker reveal">WHAT ACTUALLY HAPPENED</span>
+        <h2 class="reveal">这不是概念课，<span class="red-underline">是一次真实改造</span></h2>
+        <div class="metric-grid">
+          <div class="metric reveal d1"><strong>2</strong><span>张核心参考图：近景锁脸，全身锁成年比例与完成度。</span></div>
+          <div class="metric reveal d2"><strong>3</strong><span>个实际版本：V1 建体系，V2 修白底，V3 打开内容色板。</span></div>
+          <div class="metric reveal d3"><strong>25</strong><span>个最终 Skill 文件：规范、代理配置、参考锚点与 14 张示例。</span></div>
+        </div>
+        <div class="timeline reveal d2">
+          <div class="time-item"><span class="time-dot">1</span><h3>安装原版</h3><p>保留 ian-xiaohei-illustrations 作为上游参照。</p></div>
+          <div class="time-item"><span class="time-dot">2</span><h3>分析参考图</h3><p>从多个造型方案中收敛面部与全身锚点。</p></div>
+          <div class="time-item"><span class="time-dot">3</span><h3>定义 V3</h3><p>白底、品牌三色层、开放辅助色和非固定配件。</p></div>
+          <div class="time-item"><span class="time-dot">4</span><h3>生成 14 张</h3><p>用跨场景示例做身份与风格压力测试。</p></div>
+          <div class="time-item"><span class="time-dot">5</span><h3>发布与实测</h3><p>安装新 Skill、推送 main，再为 01.md 生成 6 张配图。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s3" data-index="03" data-title="先分清什么不能照搬">
+      <div class="slide-inner">
+        <span class="kicker reveal">STEP 01 · FORK THE METHOD</span>
+        <h2 class="reveal">先分清：<span class="highlight">继承方法</span>，还是照搬风格？</h2>
+        <div class="comparison">
+          <div class="compare-panel source reveal d1">
+            <span class="compare-label">UPSTREAM · IAN XIAOHEI</span>
+            <h3>可以继承的，是工作流骨架</h3>
+            <div class="token-row"><span class="token">读正文</span><span class="token">找认知锚点</span><span class="token">一图一结构</span><span class="token">角色做动作</span><span class="token">逐张生成</span><span class="token">QA 后交付</span></div>
+          </div>
+          <div class="compare-panel personal reveal d2">
+            <span class="compare-label">NEW · BORNFORTHIS</span>
+            <h3>必须重做的，是整套品牌表达</h3>
+            <div class="token-row"><span class="token">角色身份</span><span class="token">温暖蜡笔画风</span><span class="token">蓝黄红品牌层</span><span class="token">开放内容色</span><span class="token">字体角色</span><span class="token">配件纪律</span></div>
+          </div>
+        </div>
+        <p class="hand reveal d3" style="margin-top:1.5rem">最终策略：创建全新 Skill，保留原版；不要直接覆盖上游。</p>
+      </div>
+    </section>
+
+    <section class="slide alt" id="s4" data-index="04" data-title="选择参考锚点">
+      <div class="slide-inner">
+        <span class="kicker reveal">STEP 02 · SELECT ANCHORS</span>
+        <h2 class="reveal">两张图，各自只承担<span class="red-underline">一种职责</span></h2>
+        <div class="reference-grid">
+          <div class="reference-card reveal d1"><img src="assets/reference-face.webp" alt="Bornforthis 面部参考图"><div class="label">IMAGE 1 · FACE ANCHOR<br>锁方圆白脸、蓝碎发、黄鼻点、黄腮红和近景笔触</div></div>
+          <div class="reference-card reveal d2"><img src="assets/reference-fullbody.webp" alt="Bornforthis 全身参考图"><div class="label">IMAGE 2 · FULL-BODY ANCHOR<br>锁年轻成年比例、肢体动作、贴纸边和完成度</div></div>
+          <div class="anchor-card reveal d3"><div class="anchor-word">黄腮红</div><div class="anchor-chain">ONE-WORD ANCHOR<br><br>蓝碎发<br>＋ 白脸<br>＋ 黄腮红</div><p style="margin-top:1.3rem;color:rgba(255,255,255,.72);font-size:.78rem">耳机、蓝夹克、相机、相机包、笔记本都不能承担身份识别。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s5" data-index="05" data-title="提炼身份锁">
+      <div class="slide-inner split reverse">
+        <div class="copy reveal">
+          <span class="kicker">STEP 03 · FIXED VS VARIABLE</span>
+          <h2>身份锁要<span class="highlight">少而稳定</span></h2>
+          <p class="lead">一个好角色不是把参考图所有东西都永久化。真正稳定的是面部与比例；服装和道具必须跟随场景。</p>
+          <div class="rule-grid" style="grid-template-columns:1fr 1fr;margin-top:1.6rem">
+            <div class="rule-card"><span class="num">F</span><h3>永久固定</h3><p>年轻成年男性、4.5–5 头身、蓝碎发、纸白方圆脸、小黄鼻点、两枚黄腮红、闭口微笑。</p></div>
+            <div class="rule-card"><span class="num">V</span><h3>情境可变</h3><p>耳机、夹克、相机、相机包、笔记本，以及衬衫、围裙、工作服等全部按主题选用。</p></div>
+          </div>
+        </div>
+        <div class="visual bleed reveal d1"><img src="assets/fixed-vs-variable.webp" alt="固定身份特征与可变配饰的天平"></div>
+      </div>
+    </section>
+
+    <section class="slide yellow" id="s6" data-index="06" data-title="定义风格 DNA">
+      <div class="slide-inner">
+        <span class="kicker reveal" style="color:var(--blue-deep)">STEP 04 · STYLE DNA</span>
+        <h2 class="reveal">把“喜欢”翻译成<span style="color:var(--blue-deep)">可执行规则</span></h2>
+        <div class="rule-grid">
+          <div class="rule-card reveal d1"><span class="num">01</span><h3>背景与质感</h3><p>插图固定纯白 #FFFFFF；蜡笔与彩铅颗粒只存在于有色笔触内部，保留断笔、小白缝和不规则贴纸边。</p></div>
+          <div class="rule-card reveal d2"><span class="num">02</span><h3>气质与构图</h3><p>可爱但有品质、有温度、不像 AI；一图一隐喻、角色亲手行动、40%–60% 主体、大量留白。</p></div>
+          <div class="rule-card reveal d3"><span class="num">03</span><h3>字体角色</h3><p>汇文明朝体负责中文标题，Fraunces 负责英文装饰，Caveat 负责批注，Fira Code 负责代码与终端。</p></div>
+        </div>
+        <div class="swatches reveal d3">
+          <div class="swatch" data-name="#2B7FD8 · 60%" style="background:var(--blue);color:white"></div>
+          <div class="swatch" data-name="#F4D758 · 30%" style="background:#ffe987"></div>
+          <div class="swatch" data-name="#E84A5F · 10%" style="background:var(--red);color:white;flex:.45"></div>
+          <div class="swatch" data-name="CONTENT COLORS" style="background:linear-gradient(90deg,var(--green) 0 25%,var(--cyan) 25% 50%,var(--purple) 50% 75%,var(--brown) 75%);color:white"></div>
+        </div>
+        <p class="hand reveal d3" style="color:var(--blue-deep);margin-top:1.2rem">60 / 30 / 10 是三个品牌色彼此的视觉层级，不是整张图的像素配额。</p>
+      </div>
+    </section>
+
+    <section class="slide alt" id="s7" data-index="07" data-title="改哪些文件">
+      <div class="slide-inner file-map">
+        <div class="copy reveal">
+          <span class="kicker">STEP 05 · REWRITE AS A SYSTEM</span>
+          <h2>只改风格相关文件，<br>但必须<span class="red-underline">成组替换</span></h2>
+          <p>真正的风险不是少改一个角色名，而是旧画风、旧色彩或旧 QA 在某个 reference 里继续生效。</p>
+          <div class="do-not">保留 ian-xiaohei-illustrations；新建 bornforthis-illustrations。这样上游更新不会覆盖自己的 IP。</div>
+        </div>
+        <div class="file-list reveal d1">
+          <div class="file-item"><span class="file-icon">S</span><div><code>SKILL.md</code><br><span>入口、触发、工作流与每张图的硬约束</span></div></div>
+          <div class="file-item"><span class="file-icon">IP</span><div><code>references/bornforthis-ip.md</code><br><span>身份锁、一词识别点、可变项与禁忌</span></div></div>
+          <div class="file-item"><span class="file-icon">D</span><div><code>references/style-dna.md</code><br><span>白底、蜡笔、品牌色、辅助色与字体</span></div></div>
+          <div class="file-item"><span class="file-icon">P</span><div><code>references/prompt-template.md</code><br><span>两张参考图职责、变量、禁忌和编辑模板</span></div></div>
+          <div class="file-item"><span class="file-icon">C</span><div><code>references/composition-patterns.md</code><br><span>角色动作、低科技隐喻和反复刻规则</span></div></div>
+          <div class="file-item"><span class="file-icon">Q</span><div><code>references/qa-checklist.md</code><br><span>身份、风格、色彩、配件、文字和迭代</span></div></div>
+          <div class="file-item"><span class="file-icon">A</span><div><code>agents/openai.yaml + README + assets/</code><br><span>技能入口、说明、锚点与示例证据</span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide dark" id="s8" data-index="08" data-title="Prompt 模板">
+      <div class="slide-inner split">
+        <div class="copy reveal">
+          <span class="kicker">STEP 06 · PROMPT ENGINEERING</span>
+          <h2>Prompt 不是形容词堆砌，<br>而是<span style="color:var(--yellow)">角色契约</span></h2>
+          <p class="lead">每次生成都重复参考图职责、身份锁、场景动作、画风、色彩层、构图与禁忌。这样跨场景时，角色才不会漂移。</p>
+          <p class="hand" style="color:var(--yellow);margin-top:1.3rem">一个主题 · 一个动作 · 一个隐喻</p>
+        </div>
+        <div class="code-window reveal d1">
+          <div class="code-bar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-name">prompt-template.md</span></div>
+          <div class="code-body"><span class="cm">INPUT IMAGES</span>
+Image 1 → <span class="fn">face identity</span>
+Image 2 → <span class="fn">adult proportion + style</span>
+
+<span class="cm">IDENTITY LOCK</span>
+<span class="str">蓝碎发 + 白脸 + 黄腮红</span>
+young adult · 4.5–5 heads tall
+
+<span class="cm">SCENE</span>
+core action: <span class="gold">{Bornforthis 亲手做什么}</span>
+main metaphor: <span class="gold">{单一结构}</span>
+
+<span class="cm">STYLE / COLOR</span>
+#FFFFFF · wax crayon · whitespace
+brand 60/30/10 + semantic colors
+
+<span class="cm">FORBIDDEN</span>
+<span class="warn">no fixed headphones / jacket / camera
+no chibi · no 3D · no PPT · no gibberish</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s9" data-index="09" data-title="V1 到 V3">
+      <div class="slide-inner split reverse">
+        <div class="copy reveal">
+          <span class="kicker">STEP 07 · ITERATE ONE PROBLEM</span>
+          <h2>V1 → V3：<span class="highlight">每次只修一个系统问题</span></h2>
+          <p>V1 先证明角色能迁移到 14 个场景；V2 修正黄色满底；V3 再修正“只有三色”的误解，让材料色和状态色回到画面。</p>
+          <div class="token-row" style="margin-top:1.4rem"><span class="token">V1 · 建体系</span><span class="token">V2 · 白底</span><span class="token">V3 · 开放色板</span></div>
+        </div>
+        <div class="visual bleed reveal d1"><img src="assets/v1-v3-refinement.webp" alt="Bornforthis 调整 V1 到 V3 的印刷机"></div>
+      </div>
+    </section>
+
+    <section class="slide alt" id="s10" data-index="10" data-title="版本证据">
+      <div class="slide-inner">
+        <span class="kicker reveal">VERSION EVIDENCE</span>
+        <h2 class="reveal">不是口头说“改好了”，<span class="red-underline">要看整批结果</span></h2>
+        <div class="version-grid">
+          <div class="version reveal d1"><img src="assets/v1-overview.webp" alt="Bornforthis V1 十四张示例"><div class="version-head"><strong>V1</strong><span>SYSTEM FIRST</span></div><p>身份和构图成立，但参考图的黄色背景与配饰影响仍然明显。</p></div>
+          <div class="version reveal d2"><img src="assets/v2-overview.webp" alt="Bornforthis V2 十四张示例"><div class="version-head"><strong>V2</strong><span>WHITE CANVAS</span></div><p>纯白背景稳定，但部分真实物件被迫只用蓝黄红，语义受损。</p></div>
+          <div class="version reveal d3"><img src="assets/v3-overview.webp" alt="Bornforthis V3 十四张示例"><div class="version-head"><strong>V3</strong><span>OPEN PALETTE</span></div><p>品牌识别继续稳定，同时允许木色、绿色、紫色、灰色等合理内容色。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s11" data-index="11" data-title="为什么要 14 张">
+      <div class="slide-inner proof-layout">
+        <div class="copy reveal">
+          <span class="kicker">STEP 08 · STRESS TEST</span>
+          <h2>为什么不是只做<br><span class="highlight">一张“好看的图”</span>？</h2>
+          <p>一张图只能证明模型偶然成功。14 张不同结构、动作、服装和内容色，才是在测试这套 Skill 是否能稳定复用。</p>
+          <div class="proof-stat"><div><strong>14/14</strong><span>身份链保留</span></div><div><strong>0</strong><span>固定蓝夹克</span></div><div><strong>1</strong><span>仅降噪主题使用耳机</span></div><div><strong>1672×941</strong><span>统一约 16:9</span></div></div>
+        </div>
+        <div class="visual reveal d1"><img src="assets/v3-overview.webp" alt="十四张 Bornforthis V3 压力测试示例"></div>
+      </div>
+    </section>
+
+    <section class="slide alt" id="s12" data-index="12" data-title="QA 与定向修复">
+      <div class="slide-inner qa-grid">
+        <div class="visual reveal"><img src="assets/end-to-end-validation.webp" alt="Bornforthis 完整验证工作台"></div>
+        <div class="copy reveal d1">
+          <span class="kicker">STEP 09 · QA LIKE A SYSTEM</span>
+          <h2>QA 的关键：<span class="red-underline">一次只修一个目标</span></h2>
+          <div class="check-list">
+            <div class="check"><span class="check-mark">✓</span><div><strong>身份</strong><p>短蓝碎发、纸白脸、小黄鼻点、两枚黄腮红、成年比例。</p></div></div>
+            <div class="check"><span class="check-mark">✓</span><div><strong>风格</strong><p>纯白背景、蜡笔颗粒、贴纸边、大留白、一个物理隐喻。</p></div></div>
+            <div class="check"><span class="check-mark">✓</span><div><strong>色彩</strong><p>品牌蓝是主线；辅助色有语义，不彩虹化，也不强制三色化。</p></div></div>
+            <div class="check"><span class="check-mark">✓</span><div><strong>配件</strong><p>耳机、夹克、相机、相机包和笔记本不默认继承。</p></div></div>
+            <div class="check"><span class="check-mark">✓</span><div><strong>文字</strong><p>标签少、短、可读；严格字体要求时生成无字底图再由 HTML 排版。</p></div></div>
+          </div>
+          <p class="hand" style="margin-top:1.2rem">真实案例：文章图里意外出现相机，只做“移除相机”的局部编辑，其它全部保持不变。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide blue" id="s13" data-index="13" data-title="安装与发布">
+      <div class="slide-inner split">
+        <div class="copy reveal">
+          <span class="kicker">STEP 10 · INSTALL & SHIP</span>
+          <h2>做成新 Skill，<br>安装、提交、推送</h2>
+          <p class="lead">最终仓库中的提交是真实存在的：<strong style="color:var(--yellow)">b27483b</strong>，提交信息为 <span style="font-family:'Fira Code',monospace">feat: add Bornforthis illustration skill</span>，共加入 25 个文件。</p>
+          <div class="pill yellow" style="margin-top:1.5rem">GitHub · AndersonHJB/CodexSkills · main</div>
+        </div>
+        <div class="code-window reveal d1">
+          <div class="code-bar"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span><span class="code-name">install + verify</span></div>
+          <div class="code-body"><span class="cm"># 安装独立 Skill</span>
+python ~/.codex/skills/.system/skill-installer/scripts/\
+install-skill-from-github.py \
+  --repo AndersonHJB/CodexSkills \
+  --path skills/bornforthis-illustrations \
+  --ref main
+
+<span class="cm"># 验证关键文件与旧词残留</span>
+find ~/.codex/skills/bornforthis-illustrations -type f
+rg '<span class="warn">小黑|Xiaohei|solid-black|no extra colors</span>' \
+  ~/.codex/skills/bornforthis-illustrations
+
+<span class="cm"># 提交证据</span>
+git show --stat <span class="gold">b27483b</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="s14" data-index="14" data-title="真实文章实测">
+      <div class="slide-inner proof-layout">
+        <div class="copy reveal">
+          <span class="kicker">FORWARD TEST · DEMO/01.MD</span>
+          <h2>最后一步：让它面对<br><span class="highlight">从未见过的真实文章</span></h2>
+          <p>对《00-你可以得到什么？》提炼 6 个认知锚点：法则过载、跨域生长、高效不等于世界级、一万小时迷思、真实问题、七关键词飞轮。</p>
+          <div class="proof-stat"><div><strong>6</strong><span>独立 16:9 配图</span></div><div><strong>1</strong><span>定向移除相机</span></div><div><strong>7/7</strong><span>关键词无漏字</span></div><div><strong>#FFF</strong><span>边缘机械归一</span></div></div>
+        </div>
+        <div class="visual reveal d1"><img src="assets/article-test-overview.webp" alt="为 01.md 生成的六张 Bornforthis 配图"></div>
+      </div>
+    </section>
+
+    <section class="slide dark" id="s15" data-index="15" data-title="可复用配方">
+      <div class="slide-inner closing">
+        <div class="copy reveal">
+          <span class="kicker">THE REUSABLE RECIPE</span>
+          <h2>你真正要复制的，<br>不是我的角色，<br>而是这套<span style="color:var(--yellow)">验证路径</span></h2>
+          <p class="lead">一个专属 IP Skill 的完成标准：换文章、换动作、换服装、换内容色之后，仍然一眼认得出，而且每张图都服务内容。</p>
+          <div class="credit">Bornforthis illustrations © AndersonHJB.<br>HTML visual system adapted from ESTHER不二 / esthersjw-design-system, licensed under CC BY-NC-SA 4.0. 本教程遵循相同协议，仅供非商业使用。</div>
+        </div>
+        <div class="recipe reveal d1">
+          <div class="recipe-item"><span class="recipe-num">01</span><div><strong>保留上游，创建独立 Skill</strong><span>方法可继承，角色与风格必须隔离。</span></div></div>
+          <div class="recipe-item"><span class="recipe-num">02</span><div><strong>两张参考图 + 一个词识别点</strong><span>近景锁脸，全身锁比例；识别不能依赖配件。</span></div></div>
+          <div class="recipe-item"><span class="recipe-num">03</span><div><strong>固定项、可变项、禁忌项</strong><span>把审美偏好写成模型可执行的边界。</span></div></div>
+          <div class="recipe-item"><span class="recipe-num">04</span><div><strong>成组改写全部风格文件</strong><span>SKILL、IP、DNA、Prompt、构图、QA、示例。</span></div></div>
+          <div class="recipe-item"><span class="recipe-num">05</span><div><strong>多场景压力测试 + 前向验证</strong><span>示例不是作品集，而是可复用性的证据。</span></div></div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-label="演示操作说明">
+    <div class="help-card">
+      <h3>演示操作</h3>
+      <div class="key-grid"><div class="key"><b>→ / ↓ / Space</b><br>下一页</div><div class="key"><b>← / ↑</b><br>上一页</div><div class="key"><b>Home / End</b><br>首屏 / 末屏</div><div class="key"><b>Esc</b><br>关闭帮助</div></div>
+      <button id="closeHelp" style="margin-top:1.3rem;border:0;border-radius:999px;background:var(--blue);color:white;padding:.75rem 1.2rem;cursor:pointer">知道了</button>
+    </div>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll('#deck > .slide')];
+    const nav = document.getElementById('deckNav');
+    const progress = document.getElementById('progress');
+    const indicator = document.getElementById('pageIndicator');
+    const helpPanel = document.getElementById('helpPanel');
+    let current = 0;
+
+    slides.forEach((slide, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'deck-dot';
+      dot.title = `${String(index + 1).padStart(2,'0')} · ${slide.dataset.title || slide.querySelector('h1,h2')?.textContent.trim() || '教程'}`;
+      dot.setAttribute('aria-label', dot.title);
+      dot.addEventListener('click', () => go(index));
+      nav.appendChild(dot);
+    });
+    const dots = [...nav.children];
+
+    function update(index) {
+      current = index;
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      dots.forEach((d, i) => d.classList.toggle('active', i === index));
+      indicator.textContent = `${String(index + 1).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}`;
+      progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+      document.title = `${slideTitle(index)}｜Bornforthis IP Skill 教程`;
+    }
+    function slideTitle(index) { return slides[index]?.dataset.title || slides[index]?.querySelector('h1,h2')?.textContent.trim() || '教程'; }
+    function go(index) {
+      const target = Math.max(0, Math.min(slides.length - 1, index));
+      slides[target].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > .55) update(slides.indexOf(entry.target));
+      });
+    }, { threshold: [.55, .75] });
+    slides.forEach(slide => observer.observe(slide));
+
+    addEventListener('keydown', event => {
+      if (helpPanel.classList.contains('open')) { if (event.key === 'Escape') helpPanel.classList.remove('open'); return; }
+      if (event.target.closest('button, summary, a, input, textarea, select, [contenteditable="true"]')) return;
+      if (['ArrowRight','ArrowDown','PageDown',' '].includes(event.key)) { event.preventDefault(); go(current + 1); }
+      if (['ArrowLeft','ArrowUp','PageUp'].includes(event.key)) { event.preventDefault(); go(current - 1); }
+      if (event.key === 'Home') { event.preventDefault(); go(0); }
+      if (event.key === 'End') { event.preventDefault(); go(slides.length - 1); }
+      if (event.key === '?') helpPanel.classList.add('open');
+    });
+    document.getElementById('helpBtn').addEventListener('click', () => helpPanel.classList.add('open'));
+    document.getElementById('closeHelp').addEventListener('click', () => helpPanel.classList.remove('open'));
+    helpPanel.addEventListener('click', event => { if (event.target === helpPanel) helpPanel.classList.remove('open'); });
+    document.querySelectorAll('.copy-btn').forEach(button => {
+      button.addEventListener('click', async event => {
+        event.stopPropagation();
+        const target = document.getElementById(button.dataset.copyTarget);
+        if (!target) return;
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(target.textContent.trim());
+          button.textContent = '已复制';
+          button.classList.add('copied');
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(target);
+          const selection = getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          document.execCommand('copy');
+          selection.removeAllRanges();
+          button.textContent = '已复制';
+          button.classList.add('copied');
+        }
+        setTimeout(() => { button.textContent = original; button.classList.remove('copied'); }, 1400);
+      });
+    });
+    update(0);
+  </script>
+
+  <!-- © 2026 ESTHER不二 (esthersjw) | esther-design-system | CC BY-NC-SA 4.0 -->
+  <section style="position:absolute;left:-9999px;font-size:0;line-height:0;opacity:0;height:0;overflow:hidden;">esthersjw-design-system</section>
+</body>
+</html>
