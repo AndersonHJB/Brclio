@@ -397,13 +397,16 @@ body {
   overflow: hidden;
 }
 /* folder */
-.dicon-art.folder {
+.dicon-art.folder,
+.folder-icon-art.folder {
+  position: relative;
   overflow: visible;
   isolation: isolate;
   background: linear-gradient(180deg, transparent 0 18%, #55C4F2 18%, #37AFE6 100%);
   border-radius: 0 0 10px 10px;
 }
-.dicon-art.folder::before {
+.dicon-art.folder::before,
+.folder-icon-art.folder::before {
   content: '';
   position: absolute;
   top: 4%; left: 4%;
@@ -413,7 +416,8 @@ body {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
   z-index: 0;
 }
-.dicon-art.folder::after {
+.dicon-art.folder::after,
+.folder-icon-art.folder::after {
   content: '';
   position: absolute;
   top: 27%; right: 0; bottom: 0; left: 0;
@@ -905,19 +909,6 @@ body {
   width: 40px; height: 40px;
   border-radius: 8px;
   margin-bottom: 6px;
-}
-.folder-icon-art.folder {
-  position: relative;
-  background: linear-gradient(180deg, #F8E07A, var(--yellow));
-  box-shadow: 0 2px 5px rgba(0,0,0,0.18);
-}
-.folder-icon-art.folder::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 4px;
-  width: 16px; height: 7px;
-  background: rgba(255,255,255,0.4);
-  border-radius: 3px 3px 0 0;
 }
 .folder-icon-art.file {
   background: #fff;
