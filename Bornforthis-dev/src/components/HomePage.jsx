@@ -71,9 +71,66 @@ function DesktopIcon({ icon }) {
   );
 }
 
-function FolderIcon({ href, win, extension, label, folder = false }) {
+function FinderGlyph({ name }) {
+  if (name === 'back' || name === 'forward') {
+    const points = name === 'back' ? '15 18 9 12 15 6' : '9 18 15 12 9 6';
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points={points} /></svg>;
+  }
+
+  if (name === 'icon') {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg>;
+  }
+
+  if (name === 'list') {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="8" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="20" y2="12" /><line x1="8" y1="18" x2="20" y2="18" /><circle cx="4.5" cy="6" r=".8" /><circle cx="4.5" cy="12" r=".8" /><circle cx="4.5" cy="18" r=".8" /></svg>;
+  }
+
+  if (name === 'column') {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2" /><line x1="9" y1="4" x2="9" y2="20" /><line x1="15" y1="4" x2="15" y2="20" /></svg>;
+  }
+
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20h-6v-5h-4v5H4Z" /></svg>;
+}
+
+function FinderItem({
+  href,
+  win,
+  extension,
+  label,
+  name,
+  path,
+  modified,
+  sizeBytes,
+  itemCount,
+  kind,
+  folder = false,
+}) {
+  const itemKind = kind ?? (folder ? '文件夹' : extension === '.git' ? 'Git 仓库' : 'HTML 文稿');
+  const itemKey = path ?? href ?? win ?? label;
+
   return (
-    <div className="folder-icon" data-href={href} data-win={win}>
+    <div
+      className="finder-item"
+      data-href={href}
+      data-win={win}
+      data-item-key={itemKey}
+      data-item-type={folder ? 'directory' : 'file'}
+      data-label={label}
+      data-file-name={name ?? label}
+      data-path={path ?? href ?? ''}
+      data-kind={itemKind}
+      data-modified={modified}
+      data-size-bytes={sizeBytes}
+      data-item-count={itemCount}
+      role="option"
+      aria-selected="false"
+      tabIndex={-1}
+    >
+      {folder && (
+        <button className="finder-disclosure" type="button" data-finder-disclosure aria-label={`展开 ${label}`} aria-expanded="false">
+          <FinderGlyph name="forward" />
+        </button>
+      )}
       <div
         className={folder
           ? 'folder-icon-art folder'
@@ -81,27 +138,106 @@ function FolderIcon({ href, win, extension, label, folder = false }) {
         data-ext={folder ? undefined : extension}
       ></div>
       <div className="folder-icon-label">{label}</div>
+      <div className="finder-item-modified" aria-hidden="true"></div>
+      <div className="finder-item-size" aria-hidden="true"></div>
+      <div className="finder-item-kind" aria-hidden="true">{itemKind}</div>
     </div>
   );
 }
 
-function ContentFolderTemplate({ folder }) {
+function FinderWindow({ title, url, path, parentWindowId, children }) {
+  return (
+    <div
+      className="os-window finder-window"
+      data-title={title}
+      data-url={url}
+      data-finder-path={path ?? title}
+      data-parent-window-id={parentWindowId}
+      data-finder-view="icon"
+    >
+      <div className="os-body finder-shell" data-finder-shell>
+        <header className="finder-toolbar">
+          <div className="finder-history-controls" role="group" aria-label="浏览历史">
+            <button type="button" data-finder-back aria-label="返回" title="返回 (⌘[)" disabled><FinderGlyph name="back" /></button>
+            <button type="button" data-finder-forward aria-label="前进" title="前进 (⌘])" disabled><FinderGlyph name="forward" /></button>
+          </div>
+          <div className="finder-window-title" data-finder-title>{title}</div>
+          <div className="finder-view-switcher" role="group" aria-label="显示方式">
+            <button type="button" data-finder-view="icon" aria-label="图标视图" title="图标视图 (⌘1)" aria-pressed="true"><FinderGlyph name="icon" /></button>
+            <button type="button" data-finder-view="list" aria-label="列表视图" title="列表视图 (⌘2)" aria-pressed="false"><FinderGlyph name="list" /></button>
+            <button type="button" data-finder-view="column" aria-label="分栏视图" title="分栏视图 (⌘3)" aria-pressed="false"><FinderGlyph name="column" /></button>
+          </div>
+        </header>
+
+        <div className="finder-main">
+          <aside className="finder-sidebar" aria-label="Finder 边栏">
+            <div className="finder-sidebar-label">位置</div>
+            <button type="button" className="finder-sidebar-location is-current" data-finder-root>
+              <FinderGlyph name="home" />
+              <span data-finder-root-label>{title}</span>
+            </button>
+            <div className="finder-sidebar-help"><kbd>⌘1–3</kbd><span>切换视图</span></div>
+          </aside>
+
+          <section className="finder-content" data-finder-content tabIndex={0} aria-label={`${title} 项目`}>
+            <nav className="finder-path" data-finder-pathbar aria-label="当前位置"></nav>
+            <div className="finder-list-header" data-finder-list-header aria-hidden="true">
+              {[
+                ['name', '名称'],
+                ['modified', '修改日期'],
+                ['size', '大小'],
+                ['kind', '种类'],
+              ].map(([sortKey, sortLabel]) => (
+                <button key={sortKey} type="button" data-finder-sort={sortKey}>
+                  <span>{sortLabel}</span><span className="finder-sort-indicator" aria-hidden="true"></span><span className="finder-list-resizer" data-finder-list-resizer={sortKey}></span>
+                </button>
+              ))}
+            </div>
+            <div className="finder-viewport" data-finder-viewport>
+              <div className="finder-items" data-finder-directory-id>{children}</div>
+            </div>
+          </section>
+        </div>
+
+        <footer className="finder-statusbar">
+          <span data-finder-status aria-live="polite"></span>
+          <span className="finder-status-hint">双击打开 · Return 重命名 · 空格快速查看</span>
+        </footer>
+
+        <div className="finder-context-menu" data-finder-context-menu hidden>
+          <button type="button" data-finder-action="open">打开</button>
+          <button type="button" data-finder-action="quicklook">快速查看</button>
+          <span className="finder-menu-rule" aria-hidden="true"></span>
+          <button type="button" data-finder-action="rename">重命名</button>
+        </div>
+
+        <div className="finder-quicklook" data-finder-quicklook hidden>
+          <div className="finder-quicklook-card" role="dialog" aria-modal="true" aria-label="快速查看">
+            <button type="button" className="finder-quicklook-close" data-finder-quicklook-close aria-label="关闭快速查看">×</button>
+            <div data-finder-quicklook-content></div>
+          </div>
+        </div>
+        <span className="finder-attribution" aria-hidden="true">ESTHER不二 · esther-design-system · CC BY-NC-SA 4.0</span>
+      </div>
+    </div>
+  );
+}
+
+function ContentFolderTemplate({ folder, parentWindowId }) {
   const nestedFolders = folder.children.filter((child) => child.type === 'directory');
 
   return (
     <>
       <div id={folder.windowId} className="window-template" style={{ display: 'none' }}>
-        <div className="os-window" data-title={folder.label} data-url={folder.href}>
-          <div className="os-body win-folder">
-            {folder.children.map((child) => (
-              child.type === 'directory'
-                ? <FolderIcon key={child.path} win={child.windowId} label={child.label} folder />
-                : <FolderIcon key={child.path} href={child.href} extension=".html" label={child.label} />
-            ))}
-          </div>
-        </div>
+        <FinderWindow title={folder.label} url={folder.href} path={folder.path} parentWindowId={parentWindowId}>
+          {folder.children.map((child) => (
+            child.type === 'directory'
+              ? <FinderItem key={child.path} win={child.windowId} label={child.label} name={child.name} path={child.path} modified={child.modified} itemCount={child.itemCount} folder />
+              : <FinderItem key={child.path} href={child.href} extension=".html" label={child.label} name={child.name} path={child.path} modified={child.modified} sizeBytes={child.sizeBytes} />
+          ))}
+        </FinderWindow>
       </div>
-      {nestedFolders.map((child) => <ContentFolderTemplate key={child.path} folder={child} />)}
+      {nestedFolders.map((child) => <ContentFolderTemplate key={child.path} folder={child} parentWindowId={folder.windowId} />)}
     </>
   );
 }
@@ -141,26 +277,22 @@ function WindowTemplates() {
       </div>
 
       <div id="win-design-skill" className="window-template" style={{ display: 'none' }}>
-        <div className="os-window" data-title="Design Skill" data-url="hiesther.me/tutorials/esther-design-system" style={{ width: '380px' }}>
-          <div className="os-body win-folder">
-            <FolderIcon href="tutorials/esther-design-system/" extension=".html" label="Design Skill介绍" />
-            <FolderIcon href="tutorials/esther-design-system/demo-readme-cards.html" extension=".html" label="Demo ReadMe Cards" />
-            <FolderIcon href="tutorials/esther-design-system/design-skill-story.html" extension=".html" label="如何做出 Design Skill" />
-            <FolderIcon href="tutorials/esther-design-system/components-preview.html" extension=".html" label="设计组件库" />
-            <FolderIcon href="https://github.com/esthersjw/esther-design-system" extension=".git" label="GitHub Repo" />
-          </div>
-        </div>
+        <FinderWindow title="Design Skill" url="hiesther.me/tutorials/esther-design-system" path="Design Skill">
+          <FinderItem href="tutorials/esther-design-system/" extension=".html" label="Design Skill介绍" />
+          <FinderItem href="tutorials/esther-design-system/demo-readme-cards.html" extension=".html" label="Demo ReadMe Cards" />
+          <FinderItem href="tutorials/esther-design-system/design-skill-story.html" extension=".html" label="如何做出 Design Skill" />
+          <FinderItem href="tutorials/esther-design-system/components-preview.html" extension=".html" label="设计组件库" />
+          <FinderItem href="https://github.com/esthersjw/esther-design-system" extension=".git" kind="Git 仓库" label="GitHub Repo" />
+        </FinderWindow>
       </div>
 
       <div id="win-website-history" className="window-template" style={{ display: 'none' }}>
-        <div className="os-window" data-title="网页进化史" data-url="hiesther.me" style={{ width: '360px' }}>
-          <div className="os-body win-folder">
-            <FolderIcon href="website-ver1.html" extension=".html" label="Ver 1 — 初代个人网页" />
-            <FolderIcon href="website-ver2.html" extension=".html" label="Ver 2 — 终端穿越×无限白板" />
-            <FolderIcon win="win-ver3-cola" extension=".html" label="Ver 3 — 当前版本" />
-            <FolderIcon href="hero-playground.html" extension=".html" label="Playground" />
-          </div>
-        </div>
+        <FinderWindow title="网页进化史" url="hiesther.me" path="网页进化史">
+          <FinderItem href="website-ver1.html" extension=".html" label="Ver 1 — 初代个人网页" />
+          <FinderItem href="website-ver2.html" extension=".html" label="Ver 2 — 终端穿越×无限白板" />
+          <FinderItem win="win-ver3-cola" extension=".html" label="Ver 3 — 当前版本" />
+          <FinderItem href="hero-playground.html" extension=".html" label="Playground" />
+        </FinderWindow>
       </div>
 
       <div id="win-ver3-cola" className="window-template" style={{ display: 'none' }}>

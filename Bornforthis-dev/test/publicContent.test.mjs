@@ -66,6 +66,10 @@ test('starts at public subfolders, recurses, and prunes non-content directories'
   assert.equal(nestedFolder.children[0].href, '%E4%B8%93%E9%A2%98/%E7%AC%AC%E4%BA%8C%20%E5%B1%82/');
 
   const nestedArticle = findNode(tree, '专题/第二 层/深层+文章.html');
+  assert.match(nestedFolder.modified, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(nestedFolder.itemCount, 2);
+  assert.match(nestedArticle.modified, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(nestedArticle.sizeBytes, Buffer.byteLength('<title>深层文章</title>'));
   assert.equal(
     nestedArticle.href,
     '%E4%B8%93%E9%A2%98/%E7%AC%AC%E4%BA%8C%20%E5%B1%82/%E6%B7%B1%E5%B1%82%2B%E6%96%87%E7%AB%A0.html',

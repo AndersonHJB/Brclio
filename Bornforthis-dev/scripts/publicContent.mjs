@@ -2,6 +2,7 @@ import {
   existsSync,
   readFileSync,
   readdirSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, join, relative, sep } from 'node:path';
@@ -132,6 +133,7 @@ function walkDirectory(publicDir, absoluteDirectory, relativeDirectory = '') {
     if (entry.isDirectory()) {
       const children = walkDirectory(publicDir, absolutePath, sourcePath);
       if (children.length === 0) continue;
+      const stats = statSync(absolutePath);
 
       nodes.push({
         type: 'directory',
@@ -140,6 +142,8 @@ function walkDirectory(publicDir, absoluteDirectory, relativeDirectory = '') {
         path: sourcePath,
         href: `${encodePublicPath(sourcePath)}/`,
         windowId: folderWindowId(sourcePath),
+        modified: stats.mtime.toISOString(),
+        itemCount: children.length,
         children,
       });
       continue;
@@ -150,6 +154,7 @@ function walkDirectory(publicDir, absoluteDirectory, relativeDirectory = '') {
 
     const html = readFileSync(absolutePath, 'utf8');
     if (hasNoIndexDirective(html)) continue;
+    const stats = statSync(absolutePath);
 
     const fallback = fallbackLabel(entry.name, relativeDirectory);
     nodes.push({
@@ -158,6 +163,8 @@ function walkDirectory(publicDir, absoluteDirectory, relativeDirectory = '') {
       label: readHtmlTitle(html, fallback),
       path: sourcePath,
       href: htmlHref(sourcePath),
+      modified: stats.mtime.toISOString(),
+      sizeBytes: stats.size,
     });
   }
 
@@ -172,8 +179,10 @@ function walkContentRoots(publicDir) {
 
   for (const entry of entries) {
     const sourcePath = entry.name;
-    const children = walkDirectory(publicDir, join(publicDir, entry.name), sourcePath);
+    const absolutePath = join(publicDir, entry.name);
+    const children = walkDirectory(publicDir, absolutePath, sourcePath);
     if (children.length === 0) continue;
+    const stats = statSync(absolutePath);
 
     roots.push({
       type: 'directory',
@@ -182,6 +191,8 @@ function walkContentRoots(publicDir) {
       path: sourcePath,
       href: `${encodePublicPath(sourcePath)}/`,
       windowId: folderWindowId(sourcePath),
+      modified: stats.mtime.toISOString(),
+      itemCount: children.length,
       children,
     });
   }

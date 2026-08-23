@@ -1,3 +1,5 @@
+import { initializeFinderWindow } from './finderController';
+
 let hasInitialized = false;
 
 export function initializeSite() {
@@ -311,6 +313,40 @@ export function initializeSite() {
   var winZ = 100;
   var openCount = 0;
 
+  function setFinderActivity(activeWindow) {
+    var activeFinder = activeWindow?.classList.contains('finder-window') ? activeWindow : null;
+    surface.querySelectorAll('.finder-window').forEach(function(candidate) {
+      candidate.classList.toggle('is-active', candidate === activeFinder);
+    });
+
+    var focusedElement = document.activeElement;
+    var focusedFinder = focusedElement instanceof HTMLElement
+      ? focusedElement.closest('.finder-window')
+      : null;
+    if (focusedFinder && focusedFinder !== activeFinder) {
+      focusedElement.blur();
+    }
+  }
+
+  function focusFrontmostWindow() {
+    var windows = Array.from(surface.children).filter(function(candidate) {
+      return candidate.classList.contains('os-window');
+    });
+    var frontmost = windows.sort(function(left, right) {
+      return (Number(left.style.zIndex) || 0) - (Number(right.style.zIndex) || 0);
+    }).at(-1);
+    setFinderActivity(frontmost);
+    if (frontmost?.classList.contains('finder-window')) {
+      frontmost.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
+    } else {
+      frontmost?.focus({ preventScroll: true });
+    }
+  }
+
+  surface.addEventListener('pointerdown', function(event) {
+    setFinderActivity(event.target.closest('.os-window'));
+  }, true);
+
   function addResize(win) {
     var handle = document.createElement('div');
     handle.className = 'os-resize';
@@ -345,7 +381,16 @@ export function initializeSite() {
   function openWindow(tplId) {
     // If already open, bring to front
     var existing = surface.querySelector('.os-window[data-from="' + tplId + '"]');
-    if (existing) { existing.style.zIndex = ++winZ; return; }
+    if (existing) {
+      existing.style.zIndex = ++winZ;
+      setFinderActivity(existing);
+      if (existing.classList.contains('finder-window')) {
+        existing.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
+      } else {
+        existing.focus({ preventScroll: true });
+      }
+      return;
+    }
 
     var tpl = document.getElementById(tplId);
     if (!tpl) return;
@@ -389,10 +434,14 @@ export function initializeSite() {
     closeBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       win.remove();
+      focusFrontmostWindow();
     });
 
     // Bring to front on any press
-    win.addEventListener('pointerdown', function() { win.style.zIndex = ++winZ; });
+    win.addEventListener('pointerdown', function() {
+      win.style.zIndex = ++winZ;
+      setFinderActivity(win);
+    });
 
     // Drag by dragbar
     dragbar.addEventListener('pointerdown', function(e) {
@@ -419,16 +468,36 @@ export function initializeSite() {
 
     addResize(win);
     surface.appendChild(win);
+    if (win.classList.contains('finder-window')) {
+      initializeFinderWindow(win, tplId, {
+        openIframeWindow: openIframeWindow,
+        openTemplateWindow: openWindow,
+      });
+      setFinderActivity(win);
+      requestAnimationFrame(function() {
+        win.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
+      });
+    } else {
+      win.tabIndex = -1;
+      setFinderActivity(win);
+      requestAnimationFrame(function() { win.focus({ preventScroll: true }); });
+    }
   }
 
   function openIframeWindow(url, title) {
     // If already open, bring to front
     var existing = surface.querySelector('.os-window[data-href-src="' + url + '"]');
-    if (existing) { existing.style.zIndex = ++winZ; return; }
+    if (existing) {
+      existing.style.zIndex = ++winZ;
+      setFinderActivity(existing);
+      existing.focus({ preventScroll: true });
+      return;
+    }
 
     var win = document.createElement('div');
     win.className = 'os-window';
     win.dataset.hrefSrc = url;
+    win.tabIndex = -1;
 
     var dragbar = document.createElement('div');
     dragbar.className = 'os-dragbar';
@@ -463,8 +532,12 @@ export function initializeSite() {
     traffic.querySelector('.tl-close').addEventListener('click', function(e) {
       e.stopPropagation();
       win.remove();
+      focusFrontmostWindow();
     });
-    win.addEventListener('pointerdown', function() { win.style.zIndex = ++winZ; });
+    win.addEventListener('pointerdown', function() {
+      win.style.zIndex = ++winZ;
+      setFinderActivity(win);
+    });
     dragbar.addEventListener('pointerdown', function(e) {
       e.preventDefault();
       var startX = e.clientX, startY = e.clientY;
@@ -494,6 +567,8 @@ export function initializeSite() {
 
     addResize(win);
     surface.appendChild(win);
+    setFinderActivity(win);
+    requestAnimationFrame(function() { win.focus({ preventScroll: true }); });
   }
 
   // Make icons draggable + clickable (macOS style)
@@ -538,11 +613,15 @@ export function initializeSite() {
 
   surface.addEventListener('click', function(e) {
     var closeAction = e.target.closest('[data-close-window]');
-    if (closeAction) closeAction.closest('.os-window').remove();
+    if (closeAction) {
+      closeAction.closest('.os-window').remove();
+      focusFrontmostWindow();
+    }
   });
 
   // Folder icon dblclick → open iframe window on desktop
   surface.addEventListener('dblclick', function(e) {
+    if (e.target.closest('.finder-window')) return;
     // Handle data-win (open template window)
     var fiWin = e.target.closest('.folder-icon[data-win]');
     if (fiWin) {
