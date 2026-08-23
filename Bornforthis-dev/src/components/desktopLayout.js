@@ -16,6 +16,8 @@ export function compactDesktopIcons(icons) {
     1,
     Math.round((furthestRight - DESKTOP_GRID_START) / DESKTOP_GRID_GAP) + 1,
   );
+  const finalRowSize = icons.length % columnCount || columnCount;
+  const finalRowIndex = Math.floor((icons.length - 1) / columnCount);
 
   return icons
     .map((icon, sourceIndex) => ({ icon, sourceIndex }))
@@ -28,7 +30,8 @@ export function compactDesktopIcons(icons) {
     })
     .map(({ icon }, index) => {
       const row = Math.floor(index / columnCount);
-      const column = index % columnCount;
+      const finalRowOffset = row === finalRowIndex ? columnCount - finalRowSize : 0;
+      const column = index % columnCount + finalRowOffset;
 
       return {
         ...icon,
