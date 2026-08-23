@@ -13,10 +13,10 @@ export const wallpaperStars = [
 ].map(([top, left, size, opacity, duration, wobbleDuration, delay]) => ({ top, left, '--size': size, '--op': opacity, '--dur': duration, '--wdur': wobbleDuration, '--delay': delay }));
 
 export const desktopIcons = [
-  { win: 'win-design-skill', style: { top: '24px', right: '114px' }, artClassName: 'dicon-art folder', label: 'Design Skill' },
-  { win: 'win-sayhi', style: { top: '294px', right: '114px' }, artClassName: 'dicon-art folder', label: 'Work With Me' },
+  { win: 'win-design-skill', type: 'directory', finderDirectory: true, style: { top: '24px', right: '114px' }, artClassName: 'dicon-art folder', label: 'Design Skill' },
+  { win: 'win-sayhi', type: 'directory', finderDirectory: false, style: { top: '294px', right: '114px' }, artClassName: 'dicon-art folder', label: 'Work With Me' },
   { win: 'win-cola', style: { top: '384px', right: '114px' }, artClassName: 'dicon-art app-cola', image: { src: 'cola-avatar.png', alt: 'Cola' }, label: 'Cola' },
-  { win: 'win-website-history', style: { top: '24px', right: '204px' }, artClassName: 'dicon-art folder', label: '网页进化史' },
+  { win: 'win-website-history', type: 'directory', finderDirectory: true, style: { top: '24px', right: '204px' }, artClassName: 'dicon-art folder', label: '网页进化史' },
   { href: 'https://esthersjw.github.io/write-then-publish/', style: { top: '114px', right: '204px' }, artClassName: 'dicon-art file ext-html', extension: '.html', label: '写了就发' },
 ];
 

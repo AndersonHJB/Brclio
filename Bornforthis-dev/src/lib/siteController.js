@@ -312,6 +312,53 @@ export function initializeSite() {
   var surface = document.getElementById('desktopSurface');
   var winZ = 100;
   var openCount = 0;
+  var minimizedWindowButtons = new WeakMap();
+  var windowShelf;
+  var windowShelfItems;
+
+  function windowTitle(win) {
+    return win.dataset.title || win.dataset.hrefSrc || '窗口';
+  }
+
+  function ensureWindowShelf() {
+    if (windowShelf) return windowShelf;
+
+    windowShelf = document.createElement('div');
+    windowShelf.className = 'finder-window-shelf';
+    windowShelf.dataset.finderWindowShelf = '';
+    windowShelf.setAttribute('role', 'region');
+    windowShelf.setAttribute('aria-label', '已收起的窗口');
+    windowShelf.hidden = true;
+
+    var shelfLabel = document.createElement('span');
+    shelfLabel.className = 'finder-window-shelf-label';
+    shelfLabel.textContent = '已收起';
+    windowShelf.appendChild(shelfLabel);
+
+    windowShelfItems = document.createElement('div');
+    windowShelfItems.className = 'finder-window-shelf-items';
+    windowShelf.appendChild(windowShelfItems);
+    surface.appendChild(windowShelf);
+    return windowShelf;
+  }
+
+  function syncWindowShelf() {
+    if (!windowShelf) return;
+    windowShelf.hidden = !windowShelfItems?.childElementCount;
+  }
+
+  function removeWindowShelfButton(win) {
+    minimizedWindowButtons.get(win)?.remove();
+    minimizedWindowButtons.delete(win);
+    syncWindowShelf();
+  }
+
+  function restoreWindow(win) {
+    if (!win?.isConnected) return;
+    win.classList.remove('is-minimized');
+    win.removeAttribute('aria-hidden');
+    removeWindowShelfButton(win);
+  }
 
   function setFinderActivity(activeWindow) {
     var activeFinder = activeWindow?.classList.contains('finder-window') ? activeWindow : null;
@@ -330,7 +377,8 @@ export function initializeSite() {
 
   function focusFrontmostWindow() {
     var windows = Array.from(surface.children).filter(function(candidate) {
-      return candidate.classList.contains('os-window');
+      return candidate.classList.contains('os-window')
+        && !candidate.classList.contains('is-minimized');
     });
     var frontmost = windows.sort(function(left, right) {
       return (Number(left.style.zIndex) || 0) - (Number(right.style.zIndex) || 0);
@@ -343,6 +391,168 @@ export function initializeSite() {
     }
   }
 
+  function focusWindow(win) {
+    if (!win?.isConnected) return;
+    restoreWindow(win);
+    win.style.zIndex = ++winZ;
+    setFinderActivity(win);
+    if (win.classList.contains('finder-window')) {
+      win.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
+    } else {
+      win.focus({ preventScroll: true });
+    }
+  }
+
+  function closeWindow(win) {
+    if (!win) return;
+    removeWindowShelfButton(win);
+    win.remove();
+    focusFrontmostWindow();
+  }
+
+  function minimizeWindow(win) {
+    if (!win?.isConnected
+      || !win.classList.contains('finder-window')
+      || win.classList.contains('is-minimized')) return;
+    ensureWindowShelf();
+
+    var restoreButton = document.createElement('button');
+    restoreButton.type = 'button';
+    restoreButton.className = 'finder-window-shelf-item';
+    restoreButton.title = `恢复 ${windowTitle(win)}`;
+    restoreButton.setAttribute('aria-label', `恢复 ${windowTitle(win)}`);
+
+    var indicator = document.createElement('span');
+    indicator.className = 'finder-window-shelf-dot';
+    indicator.setAttribute('aria-hidden', 'true');
+    var label = document.createElement('span');
+    label.className = 'finder-window-shelf-name';
+    label.textContent = windowTitle(win);
+    var action = document.createElement('span');
+    action.className = 'finder-window-shelf-action';
+    action.textContent = '恢复';
+    restoreButton.append(indicator, label, action);
+    restoreButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      focusWindow(win);
+    });
+
+    minimizedWindowButtons.set(win, restoreButton);
+    windowShelfItems.appendChild(restoreButton);
+    windowShelf.hidden = false;
+    win.classList.add('is-minimized');
+    win.setAttribute('aria-hidden', 'true');
+    focusFrontmostWindow();
+  }
+
+  function clampFinderWindow(win) {
+    var smallViewport = window.innerWidth <= 768;
+    var sideInset = smallViewport ? 6 : 8;
+    var topInset = smallViewport ? 6 : 8;
+    var bottomInset = smallViewport ? 70 : 82;
+    var surfaceWidth = surface.clientWidth || window.innerWidth;
+    var surfaceHeight = surface.clientHeight || window.innerHeight;
+    var maxWidth = Math.max(240, surfaceWidth - sideInset * 2);
+    var maxHeight = Math.max(240, surfaceHeight - topInset - bottomInset);
+    var rect = win.getBoundingClientRect();
+
+    if (rect.width > maxWidth) win.style.width = `${maxWidth}px`;
+    if (rect.height > maxHeight) win.style.height = `${maxHeight}px`;
+
+    rect = win.getBoundingClientRect();
+    var maxLeft = Math.max(sideInset, surfaceWidth - rect.width - sideInset);
+    var maxTop = Math.max(topInset, surfaceHeight - rect.height - bottomInset);
+    win.style.left = `${Math.min(Math.max(win.offsetLeft, sideInset), maxLeft)}px`;
+    win.style.top = `${Math.min(Math.max(win.offsetTop, topInset), maxTop)}px`;
+  }
+
+  function toggleMaximize(win, maxButton) {
+    if (!win?.isConnected || !win.classList.contains('finder-window')) return;
+    restoreWindow(win);
+    var maximized = win.classList.toggle('is-maximized');
+    if (maxButton) {
+      maxButton.setAttribute('aria-pressed', String(maximized));
+      maxButton.setAttribute('aria-label', maximized ? '还原窗口' : '最大化窗口');
+      maxButton.title = maximized ? '还原窗口' : '最大化窗口';
+    }
+    if (!maximized) clampFinderWindow(win);
+    focusWindow(win);
+  }
+
+  function createTrafficControls(enhanced = false) {
+    var traffic = document.createElement('div');
+    traffic.className = 'os-traffic';
+    if (!enhanced) {
+      traffic.innerHTML = '<span class="tl-close"></span><span class="tl-min"></span><span class="tl-max"></span>';
+      return traffic;
+    }
+
+    [
+      ['tl-close', '关闭窗口'],
+      ['tl-min', '最小化窗口'],
+      ['tl-max', '最大化窗口'],
+    ].forEach(function([className, label]) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = className;
+      button.setAttribute('aria-label', label);
+      button.title = label;
+      if (className === 'tl-max') button.setAttribute('aria-pressed', 'false');
+      traffic.appendChild(button);
+    });
+    return traffic;
+  }
+
+  function wireWindowControls(win, traffic, dragbar, enhanced = false) {
+    var closeButton = traffic.querySelector('.tl-close');
+    var minimizeButton = traffic.querySelector('.tl-min');
+    var maximizeButton = traffic.querySelector('.tl-max');
+
+    closeButton.addEventListener('click', function(event) {
+      event.stopPropagation();
+      closeWindow(win);
+    });
+    if (enhanced) {
+      minimizeButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        minimizeWindow(win);
+      });
+      maximizeButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        toggleMaximize(win, maximizeButton);
+      });
+    }
+
+    win.addEventListener('pointerdown', function() {
+      if (win.classList.contains('is-minimized')) return;
+      win.style.zIndex = ++winZ;
+      setFinderActivity(win);
+    });
+
+    dragbar.addEventListener('pointerdown', function(event) {
+      if (enhanced && (event.button !== 0 || win.classList.contains('is-maximized'))) return;
+      event.preventDefault();
+      var startX = event.clientX, startY = event.clientY;
+      var origX = win.offsetLeft, origY = win.offsetTop;
+      function onMove(moveEvent) {
+        win.style.left = (origX + moveEvent.clientX - startX) + 'px';
+        win.style.top = (origY + moveEvent.clientY - startY) + 'px';
+      }
+      function onUp() {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+      }
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    });
+    if (enhanced) {
+      dragbar.addEventListener('dblclick', function(event) {
+        event.preventDefault();
+        toggleMaximize(win, maximizeButton);
+      });
+    }
+  }
+
   surface.addEventListener('pointerdown', function(event) {
     setFinderActivity(event.target.closest('.os-window'));
   }, true);
@@ -352,6 +562,7 @@ export function initializeSite() {
     handle.className = 'os-resize';
     win.appendChild(handle);
     handle.addEventListener('pointerdown', function(e) {
+      if (win.classList.contains('is-maximized')) return;
       e.preventDefault();
       e.stopPropagation();
       var startX = e.clientX, startY = e.clientY;
@@ -382,13 +593,7 @@ export function initializeSite() {
     // If already open, bring to front
     var existing = surface.querySelector('.os-window[data-from="' + tplId + '"]');
     if (existing) {
-      existing.style.zIndex = ++winZ;
-      setFinderActivity(existing);
-      if (existing.classList.contains('finder-window')) {
-        existing.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
-      } else {
-        existing.focus({ preventScroll: true });
-      }
+      focusWindow(existing);
       return;
     }
 
@@ -404,12 +609,9 @@ export function initializeSite() {
     dragbar.className = 'os-dragbar';
     win.insertBefore(dragbar, win.firstChild);
 
-    var traffic = document.createElement('div');
-    traffic.className = 'os-traffic';
-    traffic.innerHTML = '<span class="tl-close"></span><span class="tl-min"></span><span class="tl-max"></span>';
+    var finderControls = win.classList.contains('finder-window');
+    var traffic = createTrafficControls(finderControls);
     win.insertBefore(traffic, win.firstChild);
-
-    var closeBtn = traffic.querySelector('.tl-close');
 
     // Cascade position (Cola window centered, others cascade)
     var isSmall = window.innerWidth <= 768;
@@ -431,35 +633,7 @@ export function initializeSite() {
     win.style.zIndex = ++winZ;
     openCount++;
 
-    closeBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      win.remove();
-      focusFrontmostWindow();
-    });
-
-    // Bring to front on any press
-    win.addEventListener('pointerdown', function() {
-      win.style.zIndex = ++winZ;
-      setFinderActivity(win);
-    });
-
-    // Drag by dragbar
-    dragbar.addEventListener('pointerdown', function(e) {
-      if (e.target === closeBtn) return;
-      e.preventDefault();
-      var startX = e.clientX, startY = e.clientY;
-      var origX = win.offsetLeft, origY = win.offsetTop;
-      function onMove(ev) {
-        win.style.left = (origX + ev.clientX - startX) + 'px';
-        win.style.top = (origY + ev.clientY - startY) + 'px';
-      }
-      function onUp() {
-        document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
-      }
-      document.addEventListener('pointermove', onMove);
-      document.addEventListener('pointerup', onUp);
-    });
+    wireWindowControls(win, traffic, dragbar, finderControls);
 
     // "open works" style jump buttons
     win.querySelectorAll('[data-goto]').forEach(function(btn) {
@@ -488,9 +662,7 @@ export function initializeSite() {
     // If already open, bring to front
     var existing = surface.querySelector('.os-window[data-href-src="' + url + '"]');
     if (existing) {
-      existing.style.zIndex = ++winZ;
-      setFinderActivity(existing);
-      existing.focus({ preventScroll: true });
+      focusWindow(existing);
       return;
     }
 
@@ -503,9 +675,7 @@ export function initializeSite() {
     dragbar.className = 'os-dragbar';
     win.appendChild(dragbar);
 
-    var traffic = document.createElement('div');
-    traffic.className = 'os-traffic';
-    traffic.innerHTML = '<span class="tl-close"></span><span class="tl-min"></span><span class="tl-max"></span>';
+    var traffic = createTrafficControls();
     win.appendChild(traffic);
 
     var body = document.createElement('div');
@@ -529,30 +699,7 @@ export function initializeSite() {
     win.style.zIndex = ++winZ;
     openCount++;
 
-    traffic.querySelector('.tl-close').addEventListener('click', function(e) {
-      e.stopPropagation();
-      win.remove();
-      focusFrontmostWindow();
-    });
-    win.addEventListener('pointerdown', function() {
-      win.style.zIndex = ++winZ;
-      setFinderActivity(win);
-    });
-    dragbar.addEventListener('pointerdown', function(e) {
-      e.preventDefault();
-      var startX = e.clientX, startY = e.clientY;
-      var origX = win.offsetLeft, origY = win.offsetTop;
-      function onMove(ev) {
-        win.style.left = (origX + ev.clientX - startX) + 'px';
-        win.style.top = (origY + ev.clientY - startY) + 'px';
-      }
-      function onUp() {
-        document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
-      }
-      document.addEventListener('pointermove', onMove);
-      document.addEventListener('pointerup', onUp);
-    });
+    wireWindowControls(win, traffic, dragbar);
 
     // External open button (top-right)
     var extBtn = document.createElement('div');
@@ -614,8 +761,7 @@ export function initializeSite() {
   surface.addEventListener('click', function(e) {
     var closeAction = e.target.closest('[data-close-window]');
     if (closeAction) {
-      closeAction.closest('.os-window').remove();
-      focusFrontmostWindow();
+      closeWindow(closeAction.closest('.os-window'));
     }
   });
 
@@ -677,7 +823,7 @@ export function initializeSite() {
     // Click to spawn a star
     surface.addEventListener('click', function(e) {
       // Don't spawn on icon/window interactions
-      if (e.target.closest('.dicon, .os-window, .desktop-sticker')) return;
+      if (e.target.closest('.dicon, .os-window, .desktop-sticker, .finder-window-shelf')) return;
       var star = document.createElement('span');
       star.className = 'click-star';
       star.textContent = '\u2726';

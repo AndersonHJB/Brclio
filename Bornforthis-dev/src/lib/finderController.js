@@ -154,14 +154,15 @@ export function initializeFinderWindow(finderWindow, rootTemplateId, {
   const content = finderWindow.querySelector('[data-finder-content]');
   const viewport = finderWindow.querySelector('[data-finder-viewport]');
   const pathbar = finderWindow.querySelector('[data-finder-pathbar]');
+  const footerPathbar = finderWindow.querySelector('[data-finder-footer-pathbar]');
   const titleElement = finderWindow.querySelector('[data-finder-title]');
-  const rootLabel = finderWindow.querySelector('[data-finder-root-label]');
   const statusElement = finderWindow.querySelector('[data-finder-status]');
   const listHeader = finderWindow.querySelector('[data-finder-list-header]');
+  const locationButtons = Array.from(finderWindow.querySelectorAll('[data-finder-location]'));
   const contextMenu = finderWindow.querySelector('[data-finder-context-menu]');
   const quicklook = finderWindow.querySelector('[data-finder-quicklook]');
   const quicklookContent = finderWindow.querySelector('[data-finder-quicklook-content]');
-  if (!shell || !content || !viewport || !pathbar || !statusElement || !listHeader) return undefined;
+  if (!shell || !content || !viewport || !pathbar || !footerPathbar || !statusElement || !listHeader) return undefined;
 
   const rootDirectory = readDirectory(rootTemplateId);
   if (!rootDirectory) return undefined;
@@ -331,28 +332,44 @@ export function initializeFinderWindow(finderWindow, rootTemplateId, {
     return clone;
   }
 
-  function renderPathbar(directory) {
-    pathbar.replaceChildren();
-    const activeColumnDirectoryId = state.columnTrail[state.activeColumn]?.directoryId;
-    const pathDirectory = state.view === 'column' && activeColumnDirectoryId
-      ? readDirectory(activeColumnDirectoryId) ?? directory
+  function pathDirectoryFor(directory) {
+    const deepestColumnDirectoryId = state.columnTrail.at(-1)?.directoryId;
+    return state.view === 'column' && deepestColumnDirectoryId
+      ? readDirectory(deepestColumnDirectoryId) ?? directory
       : directory;
-    const ancestors = directoryAncestors(pathDirectory.id);
+  }
+
+  function appendPathSegments(container, ancestors, pathDirectory, { includeDesktop = false } = {}) {
+    container.replaceChildren();
+
+    if (includeDesktop) {
+      const desktop = createTextElement('span', 'finder-footer-desktop', '桌面');
+      desktop.title = '桌面文件夹';
+      container.appendChild(desktop);
+    }
 
     ancestors.forEach((ancestor, index) => {
-      if (index > 0) {
+      if (index > 0 || includeDesktop) {
         const separator = createTextElement('span', 'finder-path-separator', '›');
         separator.setAttribute('aria-hidden', 'true');
-        pathbar.appendChild(separator);
+        container.appendChild(separator);
       }
 
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.finderDirectory = ancestor.id;
       button.textContent = directoryTitle(ancestor, state);
+      button.title = ancestor.path;
       if (ancestor.id === pathDirectory.id) button.setAttribute('aria-current', 'location');
-      pathbar.appendChild(button);
+      container.appendChild(button);
     });
+  }
+
+  function renderPathbar(directory) {
+    const pathDirectory = pathDirectoryFor(directory);
+    const ancestors = directoryAncestors(pathDirectory.id);
+    appendPathSegments(pathbar, ancestors, pathDirectory);
+    appendPathSegments(footerPathbar, ancestors, pathDirectory, { includeDesktop: true });
   }
 
   function renderIconView(directory) {
@@ -508,8 +525,24 @@ export function initializeFinderWindow(finderWindow, rootTemplateId, {
 
     const title = directoryTitle(directory, state);
     if (titleElement) titleElement.textContent = title;
-    if (rootLabel) rootLabel.textContent = directoryTitle(rootDirectory, state);
+    content.setAttribute('aria-label', `${title} 项目`);
     finderWindow.dataset.title = title;
+
+    const visibleDirectory = pathDirectoryFor(directory);
+    const visibleAncestorIds = new Set(directoryAncestors(visibleDirectory.id).map((ancestor) => ancestor.id));
+    locationButtons.forEach((button) => {
+      const locationId = button.dataset.finderLocation;
+      const locationLabel = button.querySelector('span');
+      const current = button.dataset.finderLocationAction === 'navigate'
+        && visibleAncestorIds.has(locationId);
+      button.classList.toggle('is-current', current);
+      if (current) button.setAttribute('aria-current', 'location');
+      else button.removeAttribute('aria-current');
+      if (locationLabel) {
+        locationLabel.textContent = state.renamedDirectories.get(locationId)
+          ?? button.dataset.finderLocationLabel;
+      }
+    });
 
     listHeader.setAttribute('aria-hidden', String(state.view !== 'list'));
     listHeader.querySelectorAll('[data-finder-sort]').forEach((button) => {
@@ -1270,8 +1303,13 @@ export function initializeFinderWindow(finderWindow, rootTemplateId, {
       travelHistory(1);
       return;
     }
-    if (event.target.closest('[data-finder-root]')) {
-      navigateTo(state.rootId);
+    const locationButton = event.target.closest('[data-finder-location]');
+    if (locationButton) {
+      if (locationButton.dataset.finderLocationAction === 'window') {
+        openTemplateWindow?.(locationButton.dataset.finderLocation);
+      } else {
+        navigateTo(locationButton.dataset.finderLocation);
+      }
       return;
     }
     const pathButton = event.target.closest('[data-finder-directory]');

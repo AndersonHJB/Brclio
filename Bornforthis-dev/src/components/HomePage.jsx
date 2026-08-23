@@ -36,8 +36,10 @@ function automaticDesktopIcons(nodes, fixedIcons) {
 
     return {
       id: `public:${node.path}`,
+      type: node.type,
       href: node.type === 'file' ? node.href : undefined,
       win: node.type === 'directory' ? node.windowId : undefined,
+      finderDirectory: node.type === 'directory',
       style: availablePositions[index],
       artClassName: birthday
         ? 'dicon-art birthday-icon'
@@ -52,6 +54,13 @@ function automaticDesktopIcons(nodes, fixedIcons) {
 
 const publicDesktopIcons = automaticDesktopIcons(publicContentTree, desktopIcons);
 const allDesktopIcons = compactDesktopIcons([...desktopIcons, ...publicDesktopIcons]);
+const desktopFolderLocations = allDesktopIcons
+  .filter((icon) => icon.type === 'directory' && icon.win)
+  .map((icon) => ({
+    id: icon.win,
+    label: icon.label,
+    action: icon.finderDirectory ? 'navigate' : 'window',
+  }));
 
 function DesktopIcon({ icon }) {
   return (
@@ -87,6 +96,10 @@ function FinderGlyph({ name }) {
 
   if (name === 'column') {
     return <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2" /><line x1="9" y1="4" x2="9" y2="20" /><line x1="15" y1="4" x2="15" y2="20" /></svg>;
+  }
+
+  if (name === 'folder') {
+    return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5h6l1.7 2H20.5v8.8a1.7 1.7 0 0 1-1.7 1.7H5.2a1.7 1.7 0 0 1-1.7-1.7Z" /><path d="M3.5 9.5V5.7A1.7 1.7 0 0 1 5.2 4h4.1l2 2.2h7.5a1.7 1.7 0 0 1 1.7 1.7v1.6" /></svg>;
   }
 
   return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V20h-6v-5h-4v5H4Z" /></svg>;
@@ -171,11 +184,23 @@ function FinderWindow({ title, url, path, parentWindowId, children }) {
 
         <div className="finder-main">
           <aside className="finder-sidebar" aria-label="Finder 边栏">
-            <div className="finder-sidebar-label">位置</div>
-            <button type="button" className="finder-sidebar-location is-current" data-finder-root>
-              <FinderGlyph name="home" />
-              <span data-finder-root-label>{title}</span>
-            </button>
+            <div className="finder-sidebar-label">桌面文件夹</div>
+            <div className="finder-sidebar-locations">
+              {desktopFolderLocations.map((location) => (
+                <button
+                  key={location.id}
+                  type="button"
+                  className="finder-sidebar-location"
+                  data-finder-location={location.id}
+                  data-finder-location-action={location.action}
+                  data-finder-location-label={location.label}
+                  title={location.action === 'window' ? `打开 ${location.label} 窗口` : `前往 ${location.label}`}
+                >
+                  <FinderGlyph name="folder" />
+                  <span>{location.label}</span>
+                </button>
+              ))}
+            </div>
             <div className="finder-sidebar-help"><kbd>⌘1–3</kbd><span>切换视图</span></div>
           </aside>
 
@@ -199,9 +224,12 @@ function FinderWindow({ title, url, path, parentWindowId, children }) {
           </section>
         </div>
 
-        <footer className="finder-statusbar">
-          <span data-finder-status aria-live="polite"></span>
-          <span className="finder-status-hint">双击打开 · Return 重命名 · 空格快速查看</span>
+        <footer className="finder-footer">
+          <nav className="finder-footer-path" data-finder-footer-pathbar aria-label="路径栏"></nav>
+          <div className="finder-statusbar">
+            <span data-finder-status aria-live="polite"></span>
+            <span className="finder-status-hint">双击打开 · Return 重命名 · 空格快速查看</span>
+          </div>
         </footer>
 
         <div className="finder-context-menu" data-finder-context-menu hidden>
