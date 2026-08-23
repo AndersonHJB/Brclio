@@ -105,6 +105,7 @@ export function initializeSite() {
       requestAnimationFrame(function() { window.scrollTo(0, 0); });
     });
     applyScrollLock();
+    if (tab === 'home') scheduleDesktopReflow();
   }
 
   pillNav.addEventListener('click', function(e) {
@@ -315,6 +316,7 @@ export function initializeSite() {
   var minimizedWindowButtons = new WeakMap();
   var windowShelf;
   var windowShelfItems;
+  var desktopReflowPending = false;
 
   function windowTitle(win) {
     return win.dataset.title || win.dataset.hrefSrc || '窗口';
@@ -393,7 +395,9 @@ export function initializeSite() {
 
   function focusWindow(win) {
     if (!win?.isConnected) return;
+    var wasMinimized = win.classList.contains('is-minimized');
     restoreWindow(win);
+    if (wasMinimized && win.classList.contains('finder-window')) clampFinderWindow(win);
     win.style.zIndex = ++winZ;
     setFinderActivity(win);
     if (win.classList.contains('finder-window')) {
@@ -446,24 +450,92 @@ export function initializeSite() {
   }
 
   function clampFinderWindow(win) {
+    if (!win?.isConnected
+      || !win.classList.contains('finder-window')
+      || win.classList.contains('is-minimized')
+      || win.classList.contains('is-maximized')
+      || surface.clientWidth === 0
+      || surface.clientHeight === 0) return;
+
     var smallViewport = window.innerWidth <= 768;
     var sideInset = smallViewport ? 6 : 8;
     var topInset = smallViewport ? 6 : 8;
     var bottomInset = smallViewport ? 70 : 82;
     var surfaceWidth = surface.clientWidth || window.innerWidth;
     var surfaceHeight = surface.clientHeight || window.innerHeight;
-    var maxWidth = Math.max(240, surfaceWidth - sideInset * 2);
-    var maxHeight = Math.max(240, surfaceHeight - topInset - bottomInset);
-    var rect = win.getBoundingClientRect();
+    var maxWidth = Math.max(0, surfaceWidth - sideInset * 2);
+    var maxHeight = Math.max(0, surfaceHeight - topInset - bottomInset);
+    var currentWidth = win.offsetWidth;
+    var currentHeight = win.offsetHeight;
 
-    if (rect.width > maxWidth) win.style.width = `${maxWidth}px`;
-    if (rect.height > maxHeight) win.style.height = `${maxHeight}px`;
+    if (currentWidth > maxWidth) win.style.width = `${maxWidth}px`;
+    if (currentHeight > maxHeight) win.style.height = `${maxHeight}px`;
 
-    rect = win.getBoundingClientRect();
-    var maxLeft = Math.max(sideInset, surfaceWidth - rect.width - sideInset);
-    var maxTop = Math.max(topInset, surfaceHeight - rect.height - bottomInset);
+    var maxLeft = Math.max(sideInset, surfaceWidth - win.offsetWidth - sideInset);
+    var maxTop = Math.max(topInset, surfaceHeight - win.offsetHeight - bottomInset);
     win.style.left = `${Math.min(Math.max(win.offsetLeft, sideInset), maxLeft)}px`;
     win.style.top = `${Math.min(Math.max(win.offsetTop, topInset), maxTop)}px`;
+  }
+
+  function iconSafeBounds(icon) {
+    var sideInset = 8;
+    var topInset = 8;
+    var bottomInset = window.innerWidth <= 768 ? 72 : 84;
+    return {
+      minLeft: sideInset,
+      minTop: topInset,
+      maxLeft: Math.max(sideInset, surface.clientWidth - icon.offsetWidth - sideInset),
+      maxTop: Math.max(topInset, surface.clientHeight - icon.offsetHeight - bottomInset),
+    };
+  }
+
+  function rememberDraggedIconPosition(icon) {
+    if (!icon?.isConnected || surface.clientWidth === 0 || surface.clientHeight === 0) return;
+    var bounds = iconSafeBounds(icon);
+    var left = Math.min(Math.max(icon.offsetLeft, bounds.minLeft), bounds.maxLeft);
+    var top = Math.min(Math.max(icon.offsetTop, bounds.minTop), bounds.maxTop);
+    var horizontalRange = bounds.maxLeft - bounds.minLeft;
+    var verticalRange = bounds.maxTop - bounds.minTop;
+
+    icon.style.right = 'auto';
+    icon.style.left = `${left}px`;
+    icon.style.top = `${top}px`;
+    icon.dataset.desktopCustomPosition = 'true';
+    icon.dataset.desktopXRatio = String(horizontalRange > 0
+      ? (left - bounds.minLeft) / horizontalRange
+      : 0);
+    icon.dataset.desktopYRatio = String(verticalRange > 0
+      ? (top - bounds.minTop) / verticalRange
+      : 0);
+  }
+
+  function reflowDraggedDesktopIcons() {
+    if (surface.clientWidth === 0 || surface.clientHeight === 0) return;
+    surface.querySelectorAll('.desktop-icons > .dicon[data-desktop-custom-position="true"]').forEach(function(icon) {
+      var bounds = iconSafeBounds(icon);
+      var xRatio = Math.min(Math.max(Number(icon.dataset.desktopXRatio) || 0, 0), 1);
+      var yRatio = Math.min(Math.max(Number(icon.dataset.desktopYRatio) || 0, 0), 1);
+      icon.style.right = 'auto';
+      icon.style.left = `${bounds.minLeft + (bounds.maxLeft - bounds.minLeft) * xRatio}px`;
+      icon.style.top = `${bounds.minTop + (bounds.maxTop - bounds.minTop) * yRatio}px`;
+    });
+  }
+
+  function reflowDesktopSurface() {
+    if (surface.clientWidth === 0 || surface.clientHeight === 0) return;
+    Array.from(surface.children).forEach(function(candidate) {
+      if (candidate.classList.contains('finder-window')) clampFinderWindow(candidate);
+    });
+    reflowDraggedDesktopIcons();
+  }
+
+  function scheduleDesktopReflow() {
+    if (desktopReflowPending) return;
+    desktopReflowPending = true;
+    requestAnimationFrame(function() {
+      desktopReflowPending = false;
+      reflowDesktopSurface();
+    });
   }
 
   function toggleMaximize(win, maxButton) {
@@ -541,6 +613,7 @@ export function initializeSite() {
       function onUp() {
         document.removeEventListener('pointermove', onMove);
         document.removeEventListener('pointerup', onUp);
+        if (enhanced) clampFinderWindow(win);
       }
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
@@ -579,6 +652,7 @@ export function initializeSite() {
         iframes.forEach(function(f) { f.style.pointerEvents = ''; });
         document.removeEventListener('pointermove', onMove);
         document.removeEventListener('pointerup', onUp);
+        if (win.classList.contains('finder-window')) clampFinderWindow(win);
       }
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
@@ -649,6 +723,7 @@ export function initializeSite() {
       });
       setFinderActivity(win);
       requestAnimationFrame(function() {
+        clampFinderWindow(win);
         win.querySelector('[data-finder-content]')?.focus({ preventScroll: true });
       });
     } else {
@@ -720,34 +795,39 @@ export function initializeSite() {
 
   // Make icons draggable + clickable (macOS style)
   surface.querySelectorAll('.dicon').forEach(function(icon) {
-    var wasDragged = false;
     icon.addEventListener('pointerdown', function(e) {
       if (e.button !== 0) return;
       e.preventDefault();
-      wasDragged = false;
+      var dragging = false;
       var startX = e.clientX, startY = e.clientY;
-      // Convert right-positioned to left-positioned
       var rect = icon.getBoundingClientRect();
       var surfRect = surface.getBoundingClientRect();
       var origX = rect.left - surfRect.left;
       var origY = rect.top - surfRect.top;
-      icon.style.right = 'auto';
-      icon.style.left = origX + 'px';
-      icon.style.top = origY + 'px';
 
       function onMove(ev) {
         var dx = ev.clientX - startX;
         var dy = ev.clientY - startY;
-        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) wasDragged = true;
+        if (!dragging && Math.abs(dx) <= 4 && Math.abs(dy) <= 4) return;
+        if (!dragging) {
+          dragging = true;
+          // Only a real drag should replace the icon's responsive right anchor.
+          icon.style.right = 'auto';
+          icon.style.left = origX + 'px';
+          icon.style.top = origY + 'px';
+        }
         icon.style.left = (origX + dx) + 'px';
         icon.style.top = (origY + dy) + 'px';
       }
-      function onUp() {
+      function finishDrag() {
+        if (dragging) rememberDraggedIconPosition(icon);
         document.removeEventListener('pointermove', onMove);
-        document.removeEventListener('pointerup', onUp);
+        document.removeEventListener('pointerup', finishDrag);
+        document.removeEventListener('pointercancel', finishDrag);
       }
       document.addEventListener('pointermove', onMove);
-      document.addEventListener('pointerup', onUp);
+      document.addEventListener('pointerup', finishDrag);
+      document.addEventListener('pointercancel', finishDrag);
     });
     icon.addEventListener('dblclick', function() {
       if (icon.dataset.href) {
@@ -757,6 +837,8 @@ export function initializeSite() {
       }
     });
   });
+
+  window.addEventListener('resize', scheduleDesktopReflow);
 
   surface.addEventListener('click', function(e) {
     var closeAction = e.target.closest('[data-close-window]');

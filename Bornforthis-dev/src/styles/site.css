@@ -1083,7 +1083,7 @@ body {
   width: min(780px, 92vw);
   height: min(510px, 74vh);
   min-width: min(600px, 92vw);
-  min-height: 360px;
+  min-height: min(360px, calc(100dvh - 120px));
   --finder-name-width: 230px;
   --finder-modified-width: 110px;
   --finder-size-width: 70px;
@@ -2445,20 +2445,36 @@ body {
     left: 6px !important;
   }
   .finder-window-shelf {
-    right: 10px;
-    bottom: 68px;
-    left: 10px;
-    width: auto;
-    max-width: none;
+    right: 12px;
+    bottom: 76px;
+    left: auto;
+    width: max-content;
+    max-width: min(340px, calc(100% - 24px));
+    padding: 4px;
+    gap: 0;
+    border-radius: 14px;
   }
   .finder-window-shelf-label { display: none; }
   .finder-window-shelf-items {
+    width: max-content;
+    max-width: 100%;
     flex-direction: row;
+    gap: 4px;
     overflow-x: auto;
     scrollbar-width: none;
   }
   .finder-window-shelf-items::-webkit-scrollbar { display: none; }
-  .finder-window-shelf-item { flex: 0 0 min(220px, 72vw); }
+  .finder-window-shelf-item {
+    grid-template-columns: 7px minmax(0, 1fr);
+    flex: 0 0 clamp(104px, 28vw, 136px);
+    width: auto;
+    min-height: 44px;
+    padding: 6px 9px;
+    gap: 7px;
+    border-radius: 10px;
+  }
+  .finder-window-shelf-dot { width: 7px; height: 7px; }
+  .finder-window-shelf-action { display: none; }
   .desktop-sticker { width: 150px; left: 12px; right: auto; bottom: 16px; }
   .dicon { width: 68px; }
   .dicon-art { width: 42px; height: 42px; }
@@ -2466,6 +2482,13 @@ body {
   .dicon-label { font-size: 10px; }
   .win-sayhi .services-grid { grid-template-columns: 1fr; }
   .os-body.win-sayhi { padding: 28px 20px; }
+}
+
+@media (max-width: 380px) {
+  .finder-window-shelf {
+    right: 8px;
+    max-width: min(340px, calc(100% - 16px));
+  }
 }
 
 /* Reduced motion */
