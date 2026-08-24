@@ -1,4 +1,12 @@
 import { initializeFinderWindow } from './finderController';
+import {
+  articleWindowFrame,
+  availableArticleLayouts,
+  clampArticleRect,
+  getWindowCapabilities,
+  resolveArticleLayoutRect,
+  WINDOW_KINDS,
+} from './windowBehaviorModel';
 
 let hasInitialized = false;
 
@@ -88,6 +96,7 @@ export function initializeSite() {
   }
 
   function switchTab(tab) {
+    closeArticleLayoutMenu(activeArticleMenuState);
     TABS.forEach(function(t) {
       document.getElementById('page-' + t).classList.toggle('active', t === tab);
     });
@@ -317,9 +326,413 @@ export function initializeSite() {
   var windowShelf;
   var windowShelfItems;
   var desktopReflowPending = false;
+  var articleWindowStates = new WeakMap();
+  var activeArticleMenuState;
+  var articleMenuSerial = 0;
+
+  var ARTICLE_LAYOUT_OPTIONS = [
+    { layout: 'center', label: '居中', group: 'move' },
+    { layout: 'left', label: '左半边', group: 'move' },
+    { layout: 'right', label: '右半边', group: 'move' },
+    { layout: 'top', label: '上半边', group: 'move' },
+    { layout: 'bottom', label: '下半边', group: 'move' },
+    { layout: 'top-left', label: '左上角', group: 'arrange' },
+    { layout: 'top-right', label: '右上角', group: 'arrange' },
+    { layout: 'bottom-left', label: '左下角', group: 'arrange' },
+    { layout: 'bottom-right', label: '右下角', group: 'arrange' },
+  ];
 
   function windowTitle(win) {
     return win.dataset.title || win.dataset.hrefSrc || '窗口';
+  }
+
+  function windowKind(win) {
+    if (win?.classList.contains('finder-window')) return WINDOW_KINDS.FINDER;
+    if (win?.classList.contains('article-window')) return WINDOW_KINDS.ARTICLE;
+    return WINDOW_KINDS.STANDARD;
+  }
+
+  function articleFrameInput() {
+    return {
+      surfaceWidth: surface.clientWidth || window.innerWidth,
+      surfaceHeight: surface.clientHeight || window.innerHeight,
+      smallViewport: window.innerWidth <= 768,
+    };
+  }
+
+  function captureWindowRect(win) {
+    return {
+      left: win.offsetLeft,
+      top: win.offsetTop,
+      width: win.offsetWidth,
+      height: win.offsetHeight,
+    };
+  }
+
+  function setWindowRect(win, rect) {
+    win.style.left = `${rect.left}px`;
+    win.style.top = `${rect.top}px`;
+    win.style.width = `${rect.width}px`;
+    win.style.height = `${rect.height}px`;
+  }
+
+  function clearArticleMenuTimer(state, timerName) {
+    if (!state?.[timerName]) return;
+    clearTimeout(state[timerName]);
+    state[timerName] = undefined;
+  }
+
+  function clearArticleMenuTimers(state) {
+    clearArticleMenuTimer(state, 'openTimer');
+    clearArticleMenuTimer(state, 'closeTimer');
+    clearArticleMenuTimer(state, 'longPressTimer');
+  }
+
+  function articleMenuButtons(state) {
+    return Array.from(state.menu.querySelectorAll('button[role="menuitem"]'))
+      .filter(function(button) { return !button.hidden; });
+  }
+
+  function updateArticleMaximizeButton(state) {
+    if (!state) return;
+    var isFullscreen = state.layout === 'fill';
+    state.maximizeButton.setAttribute('aria-pressed', String(isFullscreen));
+    state.maximizeButton.setAttribute('aria-label', isFullscreen ? '退出文章全屏' : '全屏文章窗口');
+    state.maximizeButton.removeAttribute('title');
+    state.fullscreenLabel.textContent = isFullscreen ? '退出全屏幕' : '全屏幕';
+    state.fullscreenButton.setAttribute('aria-label', isFullscreen ? '退出文章全屏幕' : '让文章窗口全屏幕显示');
+  }
+
+  function syncArticleMenuAvailability(state) {
+    if (!state?.win.isConnected) return;
+    var available = new Set(availableArticleLayouts(articleFrameInput()));
+    state.layoutButtons.forEach(function(button, layout) {
+      button.hidden = !available.has(layout);
+    });
+    state.moveGroup.hidden = !ARTICLE_LAYOUT_OPTIONS.some(function(option) {
+      return option.group === 'move' && !state.layoutButtons.get(option.layout).hidden;
+    });
+    state.arrangeGroup.hidden = !ARTICLE_LAYOUT_OPTIONS.some(function(option) {
+      return option.group === 'arrange' && !state.layoutButtons.get(option.layout).hidden;
+    });
+    state.restoreButton.hidden = !state.restoreRect;
+    updateArticleMaximizeButton(state);
+  }
+
+  function positionArticleLayoutMenu(state) {
+    if (!state || state.menu.hidden || !state.win.isConnected) return;
+    var surfaceRect = surface.getBoundingClientRect();
+    var triggerRect = state.maximizeButton.getBoundingClientRect();
+    var frame = articleWindowFrame(articleFrameInput());
+    state.menu.style.maxHeight = `${frame.height}px`;
+    var menuWidth = state.menu.offsetWidth;
+    var menuHeight = state.menu.offsetHeight;
+    var preferredLeft = triggerRect.left - surfaceRect.left - 18;
+    var maxLeft = frame.left + frame.width - menuWidth;
+    var left = Math.min(Math.max(preferredLeft, frame.left), Math.max(frame.left, maxLeft));
+    var belowTop = triggerRect.bottom - surfaceRect.top + 8;
+    var aboveTop = triggerRect.top - surfaceRect.top - menuHeight - 8;
+    var maxTop = frame.top + frame.height - menuHeight;
+    var top = belowTop <= maxTop ? belowTop : aboveTop;
+
+    state.menu.style.left = `${left}px`;
+    state.menu.style.top = `${Math.min(Math.max(top, frame.top), Math.max(frame.top, maxTop))}px`;
+    state.menu.style.zIndex = String(Math.max(winZ + 1, (Number(state.win.style.zIndex) || 0) + 1));
+  }
+
+  function closeArticleLayoutMenu(state, { returnFocus = false } = {}) {
+    if (!state) return;
+    clearArticleMenuTimers(state);
+    state.menu.hidden = true;
+    state.maximizeButton.setAttribute('aria-expanded', 'false');
+    if (activeArticleMenuState === state) activeArticleMenuState = undefined;
+    if (returnFocus && state.win.isConnected) {
+      state.maximizeButton.focus({ preventScroll: true });
+    }
+  }
+
+  function openArticleLayoutMenu(state, focusEdge) {
+    if (!state?.win.isConnected) return;
+    if (activeArticleMenuState && activeArticleMenuState !== state) {
+      closeArticleLayoutMenu(activeArticleMenuState);
+    }
+    clearArticleMenuTimers(state);
+    syncArticleMenuAvailability(state);
+    state.menu.hidden = false;
+    state.maximizeButton.setAttribute('aria-expanded', 'true');
+    activeArticleMenuState = state;
+    positionArticleLayoutMenu(state);
+
+    if (focusEdge) {
+      var buttons = articleMenuButtons(state);
+      var button = focusEdge === 'last' ? buttons.at(-1) : buttons[0];
+      button?.focus({ preventScroll: true });
+    }
+  }
+
+  function scheduleArticleMenuOpen(state) {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    clearArticleMenuTimer(state, 'closeTimer');
+    clearArticleMenuTimer(state, 'openTimer');
+    state.openTimer = setTimeout(function() {
+      state.openTimer = undefined;
+      openArticleLayoutMenu(state);
+    }, 420);
+  }
+
+  function scheduleArticleMenuClose(state) {
+    clearArticleMenuTimer(state, 'openTimer');
+    clearArticleMenuTimer(state, 'closeTimer');
+    state.closeTimer = setTimeout(function() {
+      state.closeTimer = undefined;
+      closeArticleLayoutMenu(state);
+    }, 160);
+  }
+
+  function announceArticleLayout(state, message) {
+    state.status.textContent = '';
+    requestAnimationFrame(function() { state.status.textContent = message; });
+  }
+
+  function syncArticleLayoutGeometry(win) {
+    var state = articleWindowStates.get(win);
+    if (!state?.layout || !win.isConnected) return;
+    var available = availableArticleLayouts(articleFrameInput());
+    if (!available.includes(state.layout)) state.layout = 'fill';
+    var rect = resolveArticleLayoutRect({
+      layout: state.layout,
+      ...articleFrameInput(),
+      sourceRect: state.restoreRect || captureWindowRect(win),
+    });
+    setWindowRect(win, rect);
+    win.dataset.articleLayout = state.layout;
+    win.classList.toggle('is-maximized', state.layout === 'fill');
+    updateArticleMaximizeButton(state);
+  }
+
+  function applyArticleLayout(win, layout) {
+    var state = articleWindowStates.get(win);
+    if (!state || !availableArticleLayouts(articleFrameInput()).includes(layout)) return;
+    if (!state.restoreRect) state.restoreRect = captureWindowRect(win);
+    state.layout = layout;
+    syncArticleLayoutGeometry(win);
+    syncArticleMenuAvailability(state);
+    closeArticleLayoutMenu(state);
+    announceArticleLayout(state, layout === 'fill' ? '文章窗口已全屏' : `文章窗口已调整为${state.layoutLabels.get(layout)}`);
+    focusWindow(win);
+  }
+
+  function restoreArticleLayout(win) {
+    var state = articleWindowStates.get(win);
+    if (!state) return;
+    if (state.restoreRect) {
+      setWindowRect(win, clampArticleRect(state.restoreRect, articleFrameInput()));
+    }
+    state.layout = undefined;
+    state.restoreRect = undefined;
+    delete win.dataset.articleLayout;
+    win.classList.remove('is-maximized');
+    syncArticleMenuAvailability(state);
+    closeArticleLayoutMenu(state);
+    announceArticleLayout(state, '文章窗口已恢复原大小');
+    focusWindow(win);
+  }
+
+  function toggleArticleFullscreen(win) {
+    var state = articleWindowStates.get(win);
+    if (!state) return;
+    if (state.layout === 'fill') restoreArticleLayout(win);
+    else applyArticleLayout(win, 'fill');
+  }
+
+  function createArticleMenuButton(layout, label, className = '') {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = `article-layout-item${className ? ` ${className}` : ''}`;
+    button.dataset.articleLayoutAction = layout;
+    button.setAttribute('role', 'menuitem');
+    button.setAttribute('aria-label', label);
+    button.title = label;
+
+    var glyph = document.createElement('span');
+    glyph.className = 'article-layout-glyph';
+    glyph.dataset.layoutGlyph = layout;
+    glyph.setAttribute('aria-hidden', 'true');
+    var text = document.createElement('span');
+    text.className = className ? 'article-layout-wide-label' : 'article-layout-item-label';
+    text.textContent = label;
+    button.append(glyph, text);
+    return button;
+  }
+
+  function createArticleLayoutGroup(title) {
+    var group = document.createElement('section');
+    group.className = 'article-layout-group';
+    var heading = document.createElement('div');
+    heading.className = 'article-layout-group-title';
+    heading.textContent = title;
+    heading.setAttribute('role', 'presentation');
+    var grid = document.createElement('div');
+    grid.className = 'article-layout-grid';
+    group.append(heading, grid);
+    return { group, grid };
+  }
+
+  function wireArticleLayoutMenu(win, maximizeButton) {
+    var menuId = `article-layout-menu-${++articleMenuSerial}`;
+    var menu = document.createElement('div');
+    menu.className = 'article-layout-menu';
+    menu.id = menuId;
+    menu.hidden = true;
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', '移动与调整文章窗口大小');
+
+    var move = createArticleLayoutGroup('移动与调整大小');
+    var arrange = createArticleLayoutGroup('填充与排列');
+    var layoutButtons = new Map();
+    var layoutLabels = new Map();
+    ARTICLE_LAYOUT_OPTIONS.forEach(function(option) {
+      var button = createArticleMenuButton(option.layout, option.label);
+      layoutButtons.set(option.layout, button);
+      layoutLabels.set(option.layout, option.label);
+      (option.group === 'move' ? move.grid : arrange.grid).appendChild(button);
+    });
+    menu.append(move.group, arrange.group);
+
+    var divider = document.createElement('span');
+    divider.className = 'article-layout-divider';
+    divider.setAttribute('role', 'presentation');
+    var fullscreenButton = createArticleMenuButton('fill', '全屏幕', 'article-layout-wide');
+    var fullscreenLabel = fullscreenButton.querySelector('.article-layout-wide-label');
+    var restoreButton = createArticleMenuButton('restore', '恢复原大小', 'article-layout-wide');
+    menu.append(divider, fullscreenButton, restoreButton);
+
+    var status = document.createElement('span');
+    status.className = 'article-window-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    win.appendChild(status);
+
+    var state = {
+      win,
+      maximizeButton,
+      menu,
+      moveGroup: move.group,
+      arrangeGroup: arrange.group,
+      layoutButtons,
+      layoutLabels,
+      fullscreenButton,
+      fullscreenLabel,
+      restoreButton,
+      status,
+      layout: undefined,
+      restoreRect: undefined,
+      openTimer: undefined,
+      closeTimer: undefined,
+      longPressTimer: undefined,
+      suppressNextClick: false,
+    };
+    articleWindowStates.set(win, state);
+    surface.appendChild(menu);
+
+    maximizeButton.setAttribute('aria-haspopup', 'menu');
+    maximizeButton.setAttribute('aria-controls', menuId);
+    maximizeButton.setAttribute('aria-expanded', 'false');
+    maximizeButton.addEventListener('pointerenter', function() { scheduleArticleMenuOpen(state); });
+    maximizeButton.addEventListener('pointerdown', function(event) {
+      if (event.pointerType === 'mouse') return;
+      clearArticleMenuTimer(state, 'longPressTimer');
+      state.suppressNextClick = false;
+      state.longPressTimer = setTimeout(function() {
+        state.longPressTimer = undefined;
+        state.suppressNextClick = true;
+        openArticleLayoutMenu(state);
+      }, 480);
+    });
+    maximizeButton.addEventListener('pointerup', function() {
+      clearArticleMenuTimer(state, 'longPressTimer');
+    });
+    maximizeButton.addEventListener('pointercancel', function() {
+      clearArticleMenuTimer(state, 'longPressTimer');
+      state.suppressNextClick = false;
+    });
+    maximizeButton.addEventListener('pointerleave', function(event) {
+      if (event.pointerType === 'mouse') {
+        scheduleArticleMenuClose(state);
+      } else {
+        clearArticleMenuTimer(state, 'longPressTimer');
+        state.suppressNextClick = false;
+      }
+    });
+    maximizeButton.addEventListener('click', function(event) {
+      if (!state.suppressNextClick) return;
+      state.suppressNextClick = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }, true);
+    maximizeButton.addEventListener('keydown', function(event) {
+      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+      event.preventDefault();
+      openArticleLayoutMenu(state, event.key === 'ArrowUp' ? 'last' : 'first');
+    });
+
+    menu.addEventListener('pointerenter', function() {
+      clearArticleMenuTimer(state, 'closeTimer');
+    });
+    menu.addEventListener('pointerleave', function(event) {
+      if (event.pointerType === 'mouse') {
+        scheduleArticleMenuClose(state);
+      }
+    });
+    menu.addEventListener('click', function(event) {
+      event.stopPropagation();
+      var button = event.target.closest('[data-article-layout-action]');
+      if (!button || button.hidden) return;
+      state.suppressNextClick = false;
+      var action = button.dataset.articleLayoutAction;
+      if (action === 'restore' || (action === 'fill' && state.layout === 'fill')) {
+        restoreArticleLayout(win);
+      } else {
+        applyArticleLayout(win, action);
+      }
+    });
+    menu.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeArticleLayoutMenu(state, { returnFocus: true });
+        return;
+      }
+      if (event.key === 'Tab') {
+        closeArticleLayoutMenu(state);
+        return;
+      }
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      var buttons = articleMenuButtons(state);
+      var currentIndex = Math.max(0, buttons.indexOf(document.activeElement));
+      var nextIndex = currentIndex;
+      if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = buttons.length - 1;
+      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+      else nextIndex = (currentIndex + 1) % buttons.length;
+      buttons[nextIndex]?.focus({ preventScroll: true });
+    });
+    menu.addEventListener('focusout', function() {
+      setTimeout(function() {
+        if (menu.contains(document.activeElement) || document.activeElement === maximizeButton) return;
+        closeArticleLayoutMenu(state);
+      }, 0);
+    });
+
+    syncArticleMenuAvailability(state);
+  }
+
+  function disposeArticleWindow(win) {
+    var state = articleWindowStates.get(win);
+    if (!state) return;
+    closeArticleLayoutMenu(state);
+    state.menu.remove();
+    articleWindowStates.delete(win);
   }
 
   function ensureWindowShelf() {
@@ -398,6 +811,7 @@ export function initializeSite() {
     var wasMinimized = win.classList.contains('is-minimized');
     restoreWindow(win);
     if (wasMinimized && win.classList.contains('finder-window')) clampFinderWindow(win);
+    if (wasMinimized && win.classList.contains('article-window')) clampArticleWindow(win);
     win.style.zIndex = ++winZ;
     setFinderActivity(win);
     if (win.classList.contains('finder-window')) {
@@ -410,14 +824,16 @@ export function initializeSite() {
   function closeWindow(win) {
     if (!win) return;
     removeWindowShelfButton(win);
+    disposeArticleWindow(win);
     win.remove();
     focusFrontmostWindow();
   }
 
   function minimizeWindow(win) {
     if (!win?.isConnected
-      || !win.classList.contains('finder-window')
+      || !getWindowCapabilities(windowKind(win)).minimize
       || win.classList.contains('is-minimized')) return;
+    closeArticleLayoutMenu(articleWindowStates.get(win));
     ensureWindowShelf();
 
     var restoreButton = document.createElement('button');
@@ -444,6 +860,9 @@ export function initializeSite() {
     minimizedWindowButtons.set(win, restoreButton);
     windowShelfItems.appendChild(restoreButton);
     windowShelf.hidden = false;
+    if (win.classList.contains('article-window') && win.contains(document.activeElement)) {
+      restoreButton.focus({ preventScroll: true });
+    }
     win.classList.add('is-minimized');
     win.setAttribute('aria-hidden', 'true');
     focusFrontmostWindow();
@@ -475,6 +894,20 @@ export function initializeSite() {
     var maxTop = Math.max(topInset, surfaceHeight - win.offsetHeight - bottomInset);
     win.style.left = `${Math.min(Math.max(win.offsetLeft, sideInset), maxLeft)}px`;
     win.style.top = `${Math.min(Math.max(win.offsetTop, topInset), maxTop)}px`;
+  }
+
+  function clampArticleWindow(win) {
+    if (!win?.isConnected
+      || !win.classList.contains('article-window')
+      || win.classList.contains('is-minimized')
+      || surface.clientWidth === 0
+      || surface.clientHeight === 0) return;
+    var state = articleWindowStates.get(win);
+    if (state?.layout) {
+      syncArticleLayoutGeometry(win);
+      return;
+    }
+    setWindowRect(win, clampArticleRect(captureWindowRect(win), articleFrameInput()));
   }
 
   function iconSafeBounds(icon) {
@@ -525,6 +958,7 @@ export function initializeSite() {
     if (surface.clientWidth === 0 || surface.clientHeight === 0) return;
     Array.from(surface.children).forEach(function(candidate) {
       if (candidate.classList.contains('finder-window')) clampFinderWindow(candidate);
+      if (candidate.classList.contains('article-window')) clampArticleWindow(candidate);
     });
     reflowDraggedDesktopIcons();
   }
@@ -539,7 +973,12 @@ export function initializeSite() {
   }
 
   function toggleMaximize(win, maxButton) {
-    if (!win?.isConnected || !win.classList.contains('finder-window')) return;
+    if (!win?.isConnected || !getWindowCapabilities(windowKind(win)).maximize) return;
+    if (win.classList.contains('article-window')) {
+      closeArticleLayoutMenu(articleWindowStates.get(win));
+      toggleArticleFullscreen(win);
+      return;
+    }
     restoreWindow(win);
     var maximized = win.classList.toggle('is-maximized');
     if (maxButton) {
@@ -551,49 +990,57 @@ export function initializeSite() {
     focusWindow(win);
   }
 
-  function createTrafficControls(enhanced = false) {
+  function createTrafficControls(kind = WINDOW_KINDS.STANDARD) {
     var traffic = document.createElement('div');
     traffic.className = 'os-traffic';
-    if (!enhanced) {
+    var capabilities = getWindowCapabilities(kind);
+    if (!capabilities.minimize && !capabilities.maximize) {
       traffic.innerHTML = '<span class="tl-close"></span><span class="tl-min"></span><span class="tl-max"></span>';
       return traffic;
     }
 
+    var labels = kind === WINDOW_KINDS.ARTICLE
+      ? ['关闭文章窗口', '收起文章窗口', '全屏文章窗口']
+      : ['关闭窗口', '最小化窗口', '最大化窗口'];
     [
-      ['tl-close', '关闭窗口'],
-      ['tl-min', '最小化窗口'],
-      ['tl-max', '最大化窗口'],
+      ['tl-close', labels[0]],
+      ['tl-min', labels[1]],
+      ['tl-max', labels[2]],
     ].forEach(function([className, label]) {
       var button = document.createElement('button');
       button.type = 'button';
       button.className = className;
       button.setAttribute('aria-label', label);
-      button.title = label;
+      if (kind !== WINDOW_KINDS.ARTICLE || className !== 'tl-max') button.title = label;
       if (className === 'tl-max') button.setAttribute('aria-pressed', 'false');
       traffic.appendChild(button);
     });
     return traffic;
   }
 
-  function wireWindowControls(win, traffic, dragbar, enhanced = false) {
+  function wireWindowControls(win, traffic, dragbar, kind = WINDOW_KINDS.STANDARD) {
     var closeButton = traffic.querySelector('.tl-close');
     var minimizeButton = traffic.querySelector('.tl-min');
     var maximizeButton = traffic.querySelector('.tl-max');
+    var capabilities = getWindowCapabilities(kind);
 
     closeButton.addEventListener('click', function(event) {
       event.stopPropagation();
       closeWindow(win);
     });
-    if (enhanced) {
+    if (capabilities.minimize) {
       minimizeButton.addEventListener('click', function(event) {
         event.stopPropagation();
         minimizeWindow(win);
       });
+    }
+    if (capabilities.maximize) {
       maximizeButton.addEventListener('click', function(event) {
         event.stopPropagation();
         toggleMaximize(win, maximizeButton);
       });
     }
+    if (capabilities.layoutMenu) wireArticleLayoutMenu(win, maximizeButton);
 
     win.addEventListener('pointerdown', function() {
       if (win.classList.contains('is-minimized')) return;
@@ -602,7 +1049,9 @@ export function initializeSite() {
     });
 
     dragbar.addEventListener('pointerdown', function(event) {
-      if (enhanced && (event.button !== 0 || win.classList.contains('is-maximized'))) return;
+      closeArticleLayoutMenu(articleWindowStates.get(win));
+      if ((capabilities.minimize || capabilities.maximize)
+        && (event.button !== 0 || win.classList.contains('is-maximized') || win.dataset.articleLayout)) return;
       event.preventDefault();
       var startX = event.clientX, startY = event.clientY;
       var origX = win.offsetLeft, origY = win.offsetTop;
@@ -613,12 +1062,13 @@ export function initializeSite() {
       function onUp() {
         document.removeEventListener('pointermove', onMove);
         document.removeEventListener('pointerup', onUp);
-        if (enhanced) clampFinderWindow(win);
+        if (win.classList.contains('finder-window')) clampFinderWindow(win);
+        if (win.classList.contains('article-window')) clampArticleWindow(win);
       }
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
     });
-    if (enhanced) {
+    if (capabilities.maximize) {
       dragbar.addEventListener('dblclick', function(event) {
         event.preventDefault();
         toggleMaximize(win, maximizeButton);
@@ -629,6 +1079,19 @@ export function initializeSite() {
   surface.addEventListener('pointerdown', function(event) {
     setFinderActivity(event.target.closest('.os-window'));
   }, true);
+  document.addEventListener('pointerdown', function(event) {
+    if (!activeArticleMenuState) return;
+    if (activeArticleMenuState.menu.contains(event.target)
+      || activeArticleMenuState.maximizeButton.contains(event.target)) return;
+    closeArticleLayoutMenu(activeArticleMenuState);
+  }, true);
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && activeArticleMenuState) {
+      closeArticleLayoutMenu(activeArticleMenuState, {
+        returnFocus: activeArticleMenuState.menu.contains(document.activeElement),
+      });
+    }
+  });
 
   function addResize(win) {
     var handle = document.createElement('div');
@@ -653,6 +1116,7 @@ export function initializeSite() {
         document.removeEventListener('pointermove', onMove);
         document.removeEventListener('pointerup', onUp);
         if (win.classList.contains('finder-window')) clampFinderWindow(win);
+        if (win.classList.contains('article-window')) clampArticleWindow(win);
       }
       document.addEventListener('pointermove', onMove);
       document.addEventListener('pointerup', onUp);
@@ -683,8 +1147,10 @@ export function initializeSite() {
     dragbar.className = 'os-dragbar';
     win.insertBefore(dragbar, win.firstChild);
 
-    var finderControls = win.classList.contains('finder-window');
-    var traffic = createTrafficControls(finderControls);
+    var templateWindowKind = win.classList.contains('finder-window')
+      ? WINDOW_KINDS.FINDER
+      : WINDOW_KINDS.STANDARD;
+    var traffic = createTrafficControls(templateWindowKind);
     win.insertBefore(traffic, win.firstChild);
 
     // Cascade position (Cola window centered, others cascade)
@@ -707,7 +1173,7 @@ export function initializeSite() {
     win.style.zIndex = ++winZ;
     openCount++;
 
-    wireWindowControls(win, traffic, dragbar, finderControls);
+    wireWindowControls(win, traffic, dragbar, templateWindowKind);
 
     // "open works" style jump buttons
     win.querySelectorAll('[data-goto]').forEach(function(btn) {
@@ -742,15 +1208,17 @@ export function initializeSite() {
     }
 
     var win = document.createElement('div');
-    win.className = 'os-window';
+    win.className = 'os-window article-window';
     win.dataset.hrefSrc = url;
+    win.dataset.title = title || url;
+    win.dataset.windowKind = WINDOW_KINDS.ARTICLE;
     win.tabIndex = -1;
 
     var dragbar = document.createElement('div');
     dragbar.className = 'os-dragbar';
     win.appendChild(dragbar);
 
-    var traffic = createTrafficControls();
+    var traffic = createTrafficControls(WINDOW_KINDS.ARTICLE);
     win.appendChild(traffic);
 
     var body = document.createElement('div');
@@ -774,7 +1242,7 @@ export function initializeSite() {
     win.style.zIndex = ++winZ;
     openCount++;
 
-    wireWindowControls(win, traffic, dragbar);
+    wireWindowControls(win, traffic, dragbar, WINDOW_KINDS.ARTICLE);
 
     // External open button (top-right)
     var extBtn = document.createElement('div');
@@ -790,7 +1258,10 @@ export function initializeSite() {
     addResize(win);
     surface.appendChild(win);
     setFinderActivity(win);
-    requestAnimationFrame(function() { win.focus({ preventScroll: true }); });
+    requestAnimationFrame(function() {
+      clampArticleWindow(win);
+      win.focus({ preventScroll: true });
+    });
   }
 
   // Make icons draggable + clickable (macOS style)
@@ -838,7 +1309,10 @@ export function initializeSite() {
     });
   });
 
-  window.addEventListener('resize', scheduleDesktopReflow);
+  window.addEventListener('resize', function() {
+    closeArticleLayoutMenu(activeArticleMenuState);
+    scheduleDesktopReflow();
+  });
 
   surface.addEventListener('click', function(e) {
     var closeAction = e.target.closest('[data-close-window]');
