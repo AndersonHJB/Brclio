@@ -79,10 +79,56 @@ export function initializeSite() {
   /* ============================================
      TAB ROUTER (hash-based)
      ============================================ */
-  var TABS = ['home', 'works', 'system'];
+  var TABS = ['home', 'works', 'system', 'about'];
   var pillNav = document.getElementById('pillNav');
-  var canvasFrame = document.getElementById('canvasFrame');
-  var canvasLoaded = false;
+  var iframePages = {
+    system: document.getElementById('canvasFrame'),
+    about: document.getElementById('aboutFrame'),
+  };
+  var loadedIframePages = new Set();
+  var originalPageTitle = document.title;
+  var originalPageIcon = document.querySelector('link[rel~="icon"]');
+  var originalPageIconHref = originalPageIcon && originalPageIcon.getAttribute('href');
+  var originalPageIconType = originalPageIcon && originalPageIcon.getAttribute('type');
+  var pageIcon = originalPageIcon;
+
+  function restorePageIdentity() {
+    document.title = originalPageTitle;
+    if (!originalPageIcon) {
+      if (pageIcon) pageIcon.remove();
+      pageIcon = null;
+      return;
+    }
+    [['href', originalPageIconHref], ['type', originalPageIconType]].forEach(function(attribute) {
+      if (attribute[1] === null) originalPageIcon.removeAttribute(attribute[0]);
+      else originalPageIcon.setAttribute(attribute[0], attribute[1]);
+    });
+  }
+
+  function syncPageIdentity(tab) {
+    restorePageIdentity();
+    var frame = iframePages[tab];
+    if (!frame) return;
+    document.title = frame.title;
+    // These pages are local documents. Ignore metadata from an unloaded or navigated frame.
+    try {
+      var frameDocument = frame.contentDocument;
+      if (!frameDocument || frameDocument.URL === 'about:blank') return;
+      if (frameDocument.title) document.title = frameDocument.title;
+      var frameIcon = frameDocument.querySelector('link[rel~="icon"]');
+      if (!frameIcon || !frameIcon.getAttribute('href')) return;
+      if (!pageIcon) {
+        pageIcon = document.createElement('link');
+        pageIcon.rel = 'icon';
+        document.head.appendChild(pageIcon);
+      }
+      pageIcon.href = frameIcon.href;
+      if (frameIcon.type) pageIcon.type = frameIcon.type;
+      else pageIcon.removeAttribute('type');
+    } catch (error) {
+      // A cross-origin navigation inside a frame must not affect the outer router.
+    }
+  }
 
   function currentTab() {
     var h = location.hash.replace('#', '');
@@ -103,10 +149,12 @@ export function initializeSite() {
     pillNav.querySelectorAll('button').forEach(function(b) {
       b.classList.toggle('active', b.dataset.tab === tab);
     });
-    if (tab === 'system' && !canvasLoaded) {
-      canvasFrame.src = canvasFrame.dataset.src;
-      canvasLoaded = true;
+    var frame = iframePages[tab];
+    if (frame && !loadedIframePages.has(tab)) {
+      frame.src = frame.dataset.src;
+      loadedIframePages.add(tab);
     }
+    syncPageIdentity(tab);
     // Force top: immediately and after layout settles (defeats scroll anchoring)
     window.scrollTo(0, 0);
     requestAnimationFrame(function() {
@@ -123,6 +171,11 @@ export function initializeSite() {
   });
   window.addEventListener('hashchange', function() {
     switchTab(currentTab());
+  });
+  Object.keys(iframePages).forEach(function(tab) {
+    iframePages[tab].addEventListener('load', function() {
+      if (currentTab() === tab) syncPageIdentity(tab);
+    });
   });
 
   /* ============================================
@@ -1661,6 +1714,7 @@ export function initializeSite() {
   switchTab(currentTab());
 
   return function disposeSite() {
+    restorePageIdentity();
     timeoutIds.forEach((timeoutId) => nativeClearTimeout(timeoutId));
     intervalIds.forEach((intervalId) => nativeClearInterval(intervalId));
     animationFrameIds.forEach((frameId) => nativeCancelAnimationFrame(frameId));
