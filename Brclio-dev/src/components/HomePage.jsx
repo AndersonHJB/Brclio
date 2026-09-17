@@ -441,7 +441,7 @@ function WorksTab() {
       <div className="works-page">
         <div className="workflow-screen">
           <h1 className="workflow-headline">1 Person + AI = 1 Team</h1>
-          <p className="workflow-subtitle">ESTHER不二 · INTJ · 南大建筑 → 米兰理工 → AI · ColaOS</p>
+          <p className="workflow-subtitle">Brclio · 程序员 · 编程教育者 · 作者 · 独立开发者</p>
           <div className="workflow-columns">
             {workflowColumns.map((column) => <div className="workflow-col" key={column.title}><div className="workflow-col-title">{column.title}</div><div className="workflow-col-line"></div>{column.items.map(([label, description]) => <div className="workflow-item" key={label}><span className="workflow-item-label">{label}</span><span className="workflow-item-desc">{description}</span></div>)}</div>)}
           </div>

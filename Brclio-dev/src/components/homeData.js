@@ -27,8 +27,34 @@ export const workflowColumns = [
 ];
 
 export const workDimensions = [
-  { number: 'dim_01', title: '内容创作', description: '在小红书记录 AI × 生活的真实实践——教程、踩坑、和 Agent 搭档的日常。', links: [['📕', 'https://www.xiaohongshu.com/discovery/item/69e75262000000001a022273?source=webshare&xhsshare=pc_web&xsec_token=AB0O_ZUaCAcJA2Uvx3papyfb1vOAt4IJD1m48JaI5bJVc=&xsec_source=pc_share', '内部视角：AI 公司招聘需要的作品集'], ['🎨', 'https://www.xiaohongshu.com/discovery/item/6a2bee1f000000001c026acc?source=webshare&xhsshare=pc_web&xsec_token=ABrpjwOlAzDvtDcGWXowbbUiOr_Is_uP8Wepx-rtbmrE0=&xsec_source=pc_share', '用小黑 skill 定制自己的 IP 配图'], ['→', 'https://xhslink.cn/o/59VwcmP2rEz', '更多内容：小红书 @Esther不二']] },
-  { number: 'dim_02', title: '设计系统skill', description: '一套为Esther不二的自媒体IP生成内容设计的 Design Skill——从配色、字体、组件到排版规范，让 AI 直接输出符合我审美的html。', links: [['✨', 'tutorials/esther-design-system/', 'Design Skill 介绍'], ['💻', 'https://github.com/esthersjw/esther-design-system', 'GitHub Repo']] },
-  { number: 'dim_03', title: 'AI 实践', description: '用 AI 赋能自己的生活——从零搭建个人系统、写教程、做工具，全程和 Agent 搭档完成。', links: [['📊', 'tutorials/personal-dashboard/', '个人仪表盘：AI 人生管理系统'], ['🔧', 'tutorials/Build-Your-Own-Tool/', 'Build Your Own Tool 教程'], ['🧠', 'tutorials/09-%E5%BF%83%E7%90%86%E5%AD%A6%E4%B9%A6%E5%BA%93%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C.html', '不二的书架']] },
+  {
+    number: 'dim_01',
+    title: '内容创作',
+    description: '记录编程私教、AI 创作与独立开发的真实实践，分享教学经验、工具教程和一路上的思考。',
+    links: [
+      ['📕', 'https://www.xiaohongshu.com/discovery/item/668d2967000000002500100a?source=webshare&xhsshare=pc_web&xsec_token=YBFq9FEXq8EF-v1lqS7VLIHt3Zed2GIrEBEqg8Rdh9E6g=&xsec_source=pc_share', '从离职到编程私教：我的教学创业之路'],
+      ['🎨', 'https://www.xiaohongshu.com/discovery/item/6a7f345d000000002102260b?source=webshare&xhsshare=pc_web&xsec_token=ABUKL7LFvihfA_GyJdo-Q_OS7IYcZx0eXpJliBkqZz9DU=&xsec_source=pc_share', '制作属于自己的 IP 配图 Skills'],
+      ['→', 'https://www.xiaohongshu.com/user/profile/5e413a430000000001000f4c', '小红书@Brclio'],
+    ],
+  },
+  {
+    number: 'dim_02',
+    title: '设计系统 Skill',
+    description: '面向 Brclio 个人 IP 的 Design Skill，整理配色、字体、组件与排版规范，让 AI 创作保持统一的品牌风格。',
+    links: [
+      ['✨', 'tutorials/esther-design-system/', 'Design Skill 介绍'],
+      ['💻', 'https://github.com/Brclio/brclio-design-system', 'GitHub Repo'],
+    ],
+  },
+  {
+    number: 'dim_03',
+    title: 'AI 实践',
+    description: '把学习与创作中的想法做成工具和网站，持续探索 AI、编程教育与独立开发。',
+    links: [
+      ['💡', 'https://muse.brclio.com/', '拾念：灵感收集与 AI 整理'],
+      ['🔧', 'tutorials/Build-Your-Own-Tool/', 'Build Your Own Tool 教程'],
+      ['📚', 'https://bornforthis.cn/', 'AI悦创：编程学习与一对一辅导'],
+    ],
+  },
   { number: 'dim_04', title: '品牌运营', empty: '更多作品整理中 →' },
 ];
