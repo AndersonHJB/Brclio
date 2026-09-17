@@ -142,13 +142,13 @@ test('the archive retains all 128 essays and an embedded image for every image r
 
 test('archive About links use the top-level hash route and keep file previews usable', () => {
   const script = runtimeScript(pages.get('infinite-canvas.html'));
-  assert.match(script, /getElementById\(["']topAbout["']\)/);
-  assert.match(script, /getElementById\(["']heroAbout["']\)/);
+  assert.match(script, /(?:getElementById|byId)\(["']topAbout["']\)/);
+  assert.match(script, /(?:getElementById|byId)\(["']heroAbout["']\)/);
   assert.match(script, /link\.href\s*=\s*location\.protocol\s*===\s*["']file:["']\s*\?\s*["']about\.html["']\s*:\s*["']\.\/#about["']/);
   assert.match(script, /link\.target\s*=\s*location\.protocol\s*===\s*["']file:["']\s*\?\s*["']_self["']\s*:\s*["']_top["']/);
 });
 
-test('the archive preserves normal page scrolling without canvas wheel or zoom handlers', () => {
+test('the archive observes reading progress without intercepting wheel or zoom gestures', () => {
   const html = pages.get('infinite-canvas.html');
   const script = runtimeScript(html);
   assert.doesNotMatch(script, /\b(?:wheel|mousewheel|DOMMouseScroll|gesturechange|zoomIn|zoomOut|canvasScale|panX|panY)\b/i);
