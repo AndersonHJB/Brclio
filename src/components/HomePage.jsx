@@ -395,7 +395,7 @@ function HomeTab() {
         <div className="macbook-wrapper" id="macbookWrapper">
           <div className="macbook-screen-bezel" id="macbookBezel">
             <div className="macbook-notch"></div>
-            <div className="macbook-screen" id="macbookScreen"><div className="terminal" id="terminal"><div className="terminal-titlebar"><span className="terminal-dot red"></span><span className="terminal-dot yellow"></span><span className="terminal-dot green"></span><span className="terminal-title">esther@universe ~ zsh</span></div><div id="terminalLines"></div></div></div>
+            <div className="macbook-screen" id="macbookScreen"><div className="terminal" id="terminal"><div className="terminal-titlebar"><span className="terminal-dot red"></span><span className="terminal-dot yellow"></span><span className="terminal-dot green"></span><span className="terminal-title">Brclio@universe ~ zsh</span></div><div id="terminalLines"></div></div></div>
           </div>
           <div className="macbook-hinge"></div><div className="macbook-base"></div><div className="macbook-shadow"></div>
         </div>
@@ -403,7 +403,7 @@ function HomeTab() {
       </section>
 
       <div className="desktop" id="desktop">
-        <div className="desktop-menubar"><span className="mb-logo">esther OS</span><span className="mb-item">About</span><span className="mb-item">Values</span><span className="mb-item">Now</span><span className="mb-clock" id="mbClock">--:--</span></div>
+        <div className="desktop-menubar"><span className="mb-logo">Brclio OS</span><span className="mb-item">About</span><span className="mb-item">Values</span><span className="mb-item">Now</span><span className="mb-clock" id="mbClock">--:--</span></div>
         <div className="desktop-surface" id="desktopSurface">
           {wallpaperStars.map((style, index) => <span key={index} className="wp-star" style={style}>✦</span>)}
           <div className="desktop-sticker" id="buerSticker"><img src="brclio-sticker.png" alt="不二" /></div>
@@ -417,10 +417,10 @@ function HomeTab() {
           <div className="exit-canvas-content" id="exitCanvasContent" style={{ display: 'none' }}></div>
           <div className="exit-macbook-wrapper" id="exitMacbook" style={{ opacity: 1 }}>
             <div className="exit-bezel" id="exitBezel"><div className="exit-notch"></div><div className="exit-screen" id="exitScreen"><div className="goodbye-screen" id="goodbyeScreen">
-              <div className="goodbye-titlebar"><span className="terminal-dot red"></span><span className="terminal-dot yellow"></span><span className="terminal-dot green"></span><span className="goodbye-title-text">esther@universe ~ zsh</span></div>
+              <div className="goodbye-titlebar"><span className="terminal-dot red"></span><span className="terminal-dot yellow"></span><span className="terminal-dot green"></span><span className="goodbye-title-text">Brclio@universe ~ zsh</span></div>
               <div className="goodbye-body"><div className="goodbye-terminal">
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">echo "see you"</span></div><div className="gt-line gt-output">See you next time.</div><div className="gt-line">&nbsp;</div>
-                <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">cat contact.md</span></div><div className="gt-line gt-output">📮 <a href="mailto:aiyuechuang@gmail.com">aiyuechuang@gmail.com</a></div><div className="gt-line gt-output">📕 小红书 <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank">@ESTHER不二</a></div><div className="gt-line">&nbsp;</div>
+                <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">cat contact.md</span></div><div className="gt-line gt-output">📮 <a href="mailto:aiyuechuang@gmail.com">aiyuechuang@gmail.com</a></div><div className="gt-line gt-output">📕 小红书 <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank">@Brclio</a></div><div className="gt-line">&nbsp;</div>
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">fortune</span></div><div className="gt-line gt-dim">“找到你喜欢的事，然后让它杀死你。” — Bukowski</div><div className="gt-line">&nbsp;</div>
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">exit</span></div><div className="gt-line gt-output"><span className="gt-gold">[Process completed]</span></div>
               </div></div>

@@ -198,12 +198,13 @@ export function initializeSite() {
 
   var terminalData = [
     { type: 'cmd', prompt: '$ ', text: 'whoami' },
-    { type: 'output', prefix: '> ', text: 'ESTHER不二' },
+    { type: 'output', prefix: '> ', text: 'Brclio 悦创' },
     { type: 'blank' },
     { type: 'cmd', prompt: '$ ', text: 'cat about.md' },
-    { type: 'output', prefix: '> ', text: '在AI时代认真生活的女生' },
-    { type: 'output', prefix: '  ', text: 'INTJ / 跟Agent搭档的第1年' },
-    { type: 'output', prefix: '  ', text: '南大/米理建筑 → AI ColaOS building' },
+    { type: 'output', prefix: '> ', text: '在 AI 时代，把好奇心写成作品的人' },
+    { type: 'output', prefix: '  ', text: '教人写代码 / 也和 AI 一起写未来' },
+    { type: 'output', prefix: '  ', text: 'Brclio → 让每一个有趣的想法落地' },
+    { type: 'output', prefix: '  ', text: 'Always building something' },
     { type: 'blank' },
     { type: 'cmd', prompt: '$ ', text: 'echo "1 person + AI = 1 team"' },
     { type: 'gold', prefix: '> ', text: '1 person + AI = 1 team' },
@@ -1570,7 +1571,7 @@ export function initializeSite() {
       });
       var titleText = document.createElement('span');
       titleText.style.cssText = 'color:rgba(255,255,255,0.5);font-size:11px;margin-left:auto;margin-right:auto;font-family:sans-serif;';
-      titleText.textContent = 'esther@universe ~ zsh';
+      titleText.textContent = 'Brclio@universe ~ zsh';
       titlebar.appendChild(titleText);
       termArea.appendChild(titlebar);
 
