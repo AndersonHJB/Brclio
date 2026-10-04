@@ -190,12 +190,8 @@ export function initializeSite() {
   setInterval(tickClock, 30000);
 
   /* ============================================
-     TERMINAL TYPING (first visit) / SKIP (return)
+     TERMINAL TYPING (replay on every visit)
      ============================================ */
-  var VISITED_KEY = 'esther_visited';
-  var isReturnVisitor = false;
-  try { isReturnVisitor = !!localStorage.getItem(VISITED_KEY); } catch (e) {}
-
   var terminalData = [
     { type: 'cmd', prompt: '$ ', text: 'whoami' },
     { type: 'output', prefix: '> ', text: 'Brclio 悦创' },
@@ -237,44 +233,37 @@ export function initializeSite() {
     typingDone = true;
     heroCta.classList.add('visible');
     pillNav.classList.remove('hidden-during-intro');
-    try { localStorage.setItem(VISITED_KEY, '1'); } catch (e) {}
   }
 
-  if (isReturnVisitor) {
-    // Return visitor: terminal shows instantly (no typing), then auto zoom into desktop
-    terminalData.forEach(function(item) { renderLine(item).classList.add('visible'); });
+  // Keep the original line-by-line intro on reload as well as the first visit.
+  // Only an explicit user action may skip it or start the desktop launch.
+  var divs = [];
+  var lineDelay = 0;
+  terminalData.forEach(function(item) {
+    var div = renderLine(item);
+    if (item.type === 'blank') { lineDelay += 200; }
+    else if (item.type === 'cmd') { lineDelay += 400; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 600; }
+    else if (item.type === 'output') { lineDelay += 150; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 300; }
+    else if (item.type === 'gold') { lineDelay += 150; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 400; }
+    divs.push(div);
+    setTimeout(function() { div.classList.add('visible'); }, 50);
+  });
+
+  var typingTimeout = setTimeout(finishIntro, lineDelay + 600);
+
+  var skipTyping = function() {
+    if (typingDone) return;
+    clearTimeout(typingTimeout);
+    divs.forEach(function(d) { d.style.animationDelay = '0ms'; d.classList.add('visible'); });
     finishIntro();
-    setTimeout(launch, 700);
-  } else {
-    // First visit: full line-by-line typing intro
-    var divs = [];
-    var lineDelay = 0;
-    terminalData.forEach(function(item) {
-      var div = renderLine(item);
-      if (item.type === 'blank') { lineDelay += 200; }
-      else if (item.type === 'cmd') { lineDelay += 400; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 600; }
-      else if (item.type === 'output') { lineDelay += 150; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 300; }
-      else if (item.type === 'gold') { lineDelay += 150; div.style.animationDelay = lineDelay + 'ms'; lineDelay += 400; }
-      divs.push(div);
-      setTimeout(function() { div.classList.add('visible'); }, 50);
-    });
+  };
 
-    var typingTimeout = setTimeout(finishIntro, lineDelay + 600);
-
-    var skipTyping = function() {
-      if (typingDone) return;
-      clearTimeout(typingTimeout);
-      divs.forEach(function(d) { d.style.animationDelay = '0ms'; d.classList.add('visible'); });
-      finishIntro();
-    };
-
-    document.getElementById('heroSection').addEventListener('click', function() {
-      if (!typingDone) skipTyping();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (!typingDone && e.key !== 'Enter') skipTyping();
-    });
-  }
+  document.getElementById('heroSection').addEventListener('click', function() {
+    if (!typingDone) skipTyping();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (!typingDone && e.key !== 'Enter') skipTyping();
+  });
 
   /* ============================================
      LAUNCH: terminal → progress bar → ZOOM INTO SCREEN
@@ -1485,10 +1474,6 @@ export function initializeSite() {
   var exitScreenEl = document.getElementById('exitScreen');
   var exitStickyEl = document.getElementById('exitSticky');
 
-  var isMobile = window.innerWidth <= 768;
-  var screenW = isMobile ? 348 : 680;
-  var screenH = isMobile ? 260 : 440;
-
   function easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
@@ -1515,7 +1500,7 @@ export function initializeSite() {
       var p1 = Math.min(1, progress / 0.5);
       var ep = easeInOutCubic(p1);
       exitMacbook.style.opacity = 1;
-      var baseScale = Math.max(window.innerWidth / screenW, vh / screenH) * 1.05;
+      var baseScale = Math.max(window.innerWidth / exitScreenEl.clientWidth, vh / exitScreenEl.clientHeight) * 1.05;
       var macScale = baseScale - (baseScale - 1) * ep;
       exitMacbook.style.transform = 'scale(' + macScale + ')';
 
@@ -1539,11 +1524,7 @@ export function initializeSite() {
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', function() {
-    isMobile = window.innerWidth <= 768;
-    screenW = isMobile ? 348 : 680;
-    screenH = isMobile ? 260 : 440;
-  });
+  window.addEventListener('resize', onScroll);
 
   /* ============================================
      LOOP: Say Hi → terminal types → Enter → desktop
@@ -1560,17 +1541,17 @@ export function initializeSite() {
     setTimeout(function() {
       var termArea = document.createElement('div');
       termArea.id = 'loopTerminal';
-      termArea.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:#2B7FD8;padding:16px 20px;font-family:"Fira Code",monospace;font-size:13px;line-height:1.7;color:rgba(255,255,255,0.9);overflow:hidden;z-index:10;';
+      termArea.className = 'terminal loop-terminal';
 
       var titlebar = document.createElement('div');
-      titlebar.style.cssText = 'display:flex;align-items:center;gap:7px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.15);margin-bottom:14px;';
-      ['#ff5f57','#ffbd2e','#28ca41'].forEach(function(c) {
+      titlebar.className = 'terminal-titlebar';
+      ['red', 'yellow', 'green'].forEach(function(color) {
         var dot = document.createElement('span');
-        dot.style.cssText = 'width:10px;height:10px;border-radius:50%;background:' + c + ';';
+        dot.className = 'terminal-dot ' + color;
         titlebar.appendChild(dot);
       });
       var titleText = document.createElement('span');
-      titleText.style.cssText = 'color:rgba(255,255,255,0.5);font-size:11px;margin-left:auto;margin-right:auto;font-family:sans-serif;';
+      titleText.className = 'terminal-title';
       titleText.textContent = 'Brclio@universe ~ zsh';
       titlebar.appendChild(titleText);
       termArea.appendChild(titlebar);
@@ -1585,18 +1566,19 @@ export function initializeSite() {
 
       terminalData.forEach(function(item) {
         var div = document.createElement('div');
-        div.style.cssText = 'white-space:pre-wrap;opacity:0;transform:translateY(6px);transition:opacity 0.3s ease,transform 0.3s ease;';
+        div.className = 'term-line';
+        div.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         if (item.type === 'blank') { div.innerHTML = '&nbsp;'; lineDelay += 200; }
         else if (item.type === 'cmd') {
-          var html = '<span style="color:#F4D758;font-weight:700">' + item.prompt + '</span><span style="color:#fff;font-weight:500">' + item.text + '</span>';
-          if (item.cursor) html += '<span style="display:inline-block;width:9px;height:17px;background:#fff;vertical-align:middle;margin-left:2px;animation:blink 1s step-end infinite" id="loopCursor"></span>';
+          var html = '<span class="term-prompt">' + item.prompt + '</span><span class="term-cmd">' + item.text + '</span>';
+          if (item.cursor) html += '<span class="cursor" id="loopCursor"></span>';
           div.innerHTML = html;
           lineDelay += 400;
         } else if (item.type === 'output') {
-          div.innerHTML = '<span style="color:rgba(255,255,255,0.85)">' + item.prefix + item.text + '</span>';
+          div.innerHTML = '<span class="term-output">' + item.prefix + item.text + '</span>';
           lineDelay += 150;
         } else if (item.type === 'gold') {
-          div.innerHTML = '<span style="background:#F4D758;color:#1E5BA8;font-weight:700;font-size:13px;padding:1px 6px;border-radius:3px">' + item.prefix + item.text + '</span>';
+          div.innerHTML = '<span class="term-gold">' + item.prefix + item.text + '</span>';
           lineDelay += 150;
         }
         termLines.appendChild(div);
@@ -1611,7 +1593,7 @@ export function initializeSite() {
       setTimeout(function() {
         loopTypingDone = true;
         var hint = document.createElement('div');
-        hint.style.cssText = 'text-align:center;margin-top:16px;font-size:11px;color:rgba(30,91,168,0.5);opacity:0;transition:opacity 0.5s ease;';
+        hint.className = 'terminal-hint';
         hint.textContent = 'press enter to launch ↵';
         termLines.appendChild(hint);
         setTimeout(function() { hint.style.opacity = '1'; }, 100);
@@ -1632,12 +1614,18 @@ export function initializeSite() {
 
         var cursor = document.getElementById('loopCursor');
         if (cursor) cursor.remove();
+        var hint = termLines.querySelector('.terminal-hint');
+        if (hint) hint.remove();
 
         var launchLine = document.createElement('div');
-        launchLine.style.cssText = 'white-space:pre-wrap;opacity:0;transition:opacity 0.3s ease;';
-        launchLine.innerHTML = '<span style="color:#2B7FD8">> launching...</span>';
+        launchLine.className = 'term-line';
+        launchLine.style.transition = 'opacity 0.3s ease';
+        launchLine.innerHTML = '<span class="term-output">> launching...</span>';
         termLines.appendChild(launchLine);
-        setTimeout(function() { launchLine.style.opacity = '1'; }, 50);
+        setTimeout(function() {
+          launchLine.style.opacity = '1';
+          launchLine.style.transform = 'translateY(0)';
+        }, 50);
 
         setTimeout(function() {
           var overlay = document.getElementById('transitionOverlay');

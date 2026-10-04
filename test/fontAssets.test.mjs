@@ -43,12 +43,12 @@ test('serves one local Huiwen Mincho asset to every page that uses it', async ()
 
   assert.deepEqual(pagesUsingHuiwen.sort(), [
     'hero-playground.html',
+    'tutorials/brclio-design-system/demo-readme-cards.html',
+    'tutorials/brclio-design-system/index.html',
     'tutorials/cola+ob自媒体分享/04-system.html',
     'tutorials/cola+ob自媒体分享/demo-design-skill-cards.html',
     'tutorials/cola+ob自媒体分享/demo-readme-tutorial.html',
     'tutorials/cola+ob自媒体分享/index.html',
-    'tutorials/esther-design-system/demo-readme-cards.html',
-    'tutorials/esther-design-system/index.html',
     'website-ver1.html',
   ]);
 });

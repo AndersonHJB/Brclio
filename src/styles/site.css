@@ -169,6 +169,21 @@ body {
               opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
               filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
+.loop-terminal {
+  position: absolute;
+  inset: 0;
+  background: var(--blue);
+  color: rgba(255,255,255,0.9);
+  z-index: 10;
+}
+.terminal-hint {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 11px;
+  color: rgba(30,91,168,0.5);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
 .terminal-titlebar {
   display: flex;
   align-items: center;
@@ -208,6 +223,7 @@ body {
   padding: 2px 8px;
   border-radius: 3px;
 }
+.loop-terminal .term-gold { font-size: 13px; padding: 1px 6px; }
 
 .cursor {
   display: inline-block;
@@ -2599,29 +2615,79 @@ body {
 }
 
 /* ============================================
+   COMPACT LAPTOP (narrow or short viewport)
+   ============================================ */
+@media (max-width: 768px), (max-height: 600px) {
+  .macbook-wrapper, .exit-macbook-wrapper {
+    --laptop-width: min(400px, calc(100vw - 24px));
+    --laptop-screen-height: 260px;
+  }
+  .macbook-screen-bezel, .exit-bezel {
+    width: calc(var(--laptop-width) - 32px);
+    padding: 10px;
+    padding-top: 0;
+    border-radius: 10px 10px 0 0;
+  }
+  .macbook-notch, .exit-notch { width: 80px; height: 10px; }
+  .macbook-screen, .exit-screen {
+    width: calc(var(--laptop-width) - 52px);
+    height: var(--laptop-screen-height);
+    border-radius: 3px;
+  }
+  .macbook-hinge, .exit-hinge { width: calc(var(--laptop-width) - 22px); }
+  .macbook-base, .exit-base {
+    width: var(--laptop-width);
+    height: 10px;
+    border-radius: 0 0 8px 8px;
+  }
+  .macbook-shadow, .exit-shadow { width: calc(var(--laptop-width) - 40px); }
+
+  .terminal { padding: 8px 10px; font-size: 10px; line-height: 1.4; }
+  .terminal-titlebar { gap: 5px; padding-bottom: 5px; margin-bottom: 6px; }
+  .terminal-dot { width: 7px; height: 7px; flex-shrink: 0; }
+  .terminal-title { font-size: 9px; }
+  .term-gold, .loop-terminal .term-gold { font-size: 1em; padding: 1px 6px; }
+  .cursor { width: 0.55em; height: 1em; }
+  .terminal-hint { margin-top: 8px; font-size: 9px; }
+
+  .goodbye-titlebar { gap: 5px; padding: 8px 10px 6px; }
+  .goodbye-title-text { font-size: 9px; }
+  .goodbye-body { min-height: 0; padding: 4px 8px; }
+  .goodbye-terminal { font-size: 10px; line-height: 1.4; padding: 0; }
+  .goodbye-terminal .gt-dim, .goodbye-terminal .gt-gold { font-size: 10px; }
+  .goodbye-footer { font-size: 8px; padding: 6px; }
+  .hero-cta { margin-top: 16px; }
+}
+
+@media (max-height: 360px) {
+  .macbook-wrapper, .exit-macbook-wrapper {
+    --laptop-screen-height: max(160px, calc(100dvh - 112px));
+  }
+  .terminal { padding: 5px 8px; font-size: 9px; line-height: 1.25; }
+  .terminal-titlebar { padding-bottom: 3px; margin-bottom: 4px; }
+  .terminal-title { font-size: 8px; }
+  .terminal-hint { margin-top: 4px; font-size: 8px; }
+  .goodbye-titlebar { padding: 5px 8px 4px; }
+  .goodbye-title-text { font-size: 8px; }
+  .goodbye-body { padding: 3px 8px; }
+  .goodbye-terminal { font-size: 9px; line-height: 1.25; }
+  .goodbye-terminal .gt-dim, .goodbye-terminal .gt-gold { font-size: 9px; }
+  .goodbye-footer { font-size: 7px; padding: 4px; }
+  .macbook-shadow, .exit-shadow { height: 20px; }
+  .hero-cta { margin-top: 8px; }
+  .hero-cta .cta-text { font-size: 10px; }
+  .hero-cta .cta-arrow { font-size: 12px; margin-top: 2px; }
+}
+
+/* ============================================
    MOBILE
    ============================================ */
 @media (max-width: 768px) {
-  .macbook-screen-bezel, .exit-bezel { width: 368px; padding: 10px; padding-top: 0; border-radius: 10px 10px 0 0; }
-  .macbook-notch, .exit-notch { width: 80px; height: 10px; }
-  .macbook-screen, .exit-screen { width: 348px; height: 260px; border-radius: 3px; }
-  .macbook-hinge, .exit-hinge { width: 378px; }
-  .macbook-base, .exit-base { width: 400px; height: 10px; border-radius: 0 0 8px 8px; }
-  .macbook-shadow, .exit-shadow { width: 360px; }
-
-  .terminal { padding: 10px 12px; font-size: 10px; }
-  .terminal-titlebar { gap: 5px; padding-bottom: 8px; margin-bottom: 10px; }
-  .terminal-dot { width: 7px; height: 7px; }
-  .terminal-title { font-size: 9px; }
-  .term-gold { font-size: 11px; }
-
   .pill-nav { bottom: 16px; }
   .pill-nav button { font-size: 12px; padding: 8px 13px; }
   .pill-nav .pill-num { display: none; }
 
   .canvas-hint { display: none; } /* canvas already shows its own help hint */
-
-  .goodbye-terminal { font-size: 11px; line-height: 1.9; }
 
   .workflow-screen { padding: 30px 20px; }
   .workflow-headline { font-size: 36px; }
