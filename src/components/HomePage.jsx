@@ -390,7 +390,18 @@ function WindowTemplates() {
 
 function HomeTab() {
   return (
-    <main className="tab-page active" id="page-home">
+    <main className="tab-page active" id="page-home" aria-labelledby="site-heading">
+      <header className="semantic-summary">
+        <h1 id="site-heading">Brclio 悦创：在 AI 时代，把好奇心写成作品</h1>
+        <p>Brclio 悦创是一位程序员、编程教育者、作者与独立开发者，教人写代码，也和 AI 一起把有趣的想法做成作品。</p>
+        <nav aria-label="网站主要内容">
+          <a href="tutorials/人生系统/">用两个 Agent 搭建人生系统</a>
+          <a href="tutorials/brclio-design-system/">Brclio Design System</a>
+          <a href="tutorials/personal-dashboard/">个人看板</a>
+          <a href="tutorials/Build-Your-Own-Tool/">用 Agent 开发自己的工具</a>
+          <a href="tutorials/cola+ob自媒体分享/">Cola + Obsidian 自媒体工作流</a>
+        </nav>
+      </header>
       <section className="hero-section" id="heroSection">
         <div className="macbook-wrapper" id="macbookWrapper">
           <div className="macbook-screen-bezel" id="macbookBezel">
