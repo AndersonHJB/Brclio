@@ -435,7 +435,7 @@ function HomeTab() {
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">fortune</span></div><div className="gt-line gt-dim">“找到你喜欢的事，然后让它杀死你。” — Bukowski</div><div className="gt-line">&nbsp;</div>
                 <div className="gt-line"><span className="gt-prompt">$ </span><span className="gt-cmd">exit</span></div><div className="gt-line gt-output"><span className="gt-gold">[Process completed]</span></div>
               </div></div>
-              <div className="goodbye-footer">© 2026 ESTHER不二 · Built with AI &amp; attitude</div>
+              <div className="goodbye-footer">© 2026 Brclio悦创 · Built with AI &amp; attitude</div>
             </div></div></div>
             <div className="exit-hinge"></div><div className="exit-base"></div><div className="exit-shadow"></div>
           </div>
