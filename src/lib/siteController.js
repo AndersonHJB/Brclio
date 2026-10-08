@@ -209,7 +209,7 @@ export function initializeSite() {
     { type: 'cmd', prompt: '$ ', text: 'echo "1 person + AI = 1 team"' },
     { type: 'gold', prefix: '> ', text: '1 person + AI = 1 team' },
     { type: 'blank' },
-    { type: 'cmd', prompt: '$ ', text: 'open esther-os.app', cursor: true }
+    { type: 'cmd', prompt: '$ ', text: 'open brclio-os.app', cursor: true }
   ];
 
   var container = document.getElementById('terminalLines');
