@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ESTHER不二 — 在AI时代认真生活的女生</title>
-<meta name="description" content="ESTHER不二的个人网站。从米兰设计到AI产品，在AI时代认真生活的女生。">
+<title>Brclio · 黄家宝 — 写代码，教编程，做产品</title>
+<meta name="description" content="Brclio（黄家宝 / AI悦创 / Bornforthis）的个人网站。程序员、编程教育者、作者与独立开发者，记录 Python 教学、技术写作、AI 实践与开源创作。">
+<meta name="author" content="Brclio · 黄家宝">
+<link rel="icon" type="image/png" href="brclio-sticker.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Caveat:wght@400;600&family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
@@ -32,7 +34,7 @@
   font-size: clamp(1.8rem, 4vw, 2.8rem);
   text-align: center; margin-bottom: 2.5rem; color: #1a1a1a;
 }
-.journey-headline em { font-style: normal; color: #2B7FD8; }
+.journey-headline em { display: inline-block; font-style: normal; color: #2B7FD8; }
 
 .journey-two-screens {
   display: grid;
@@ -64,9 +66,40 @@
 .journey-window-dots { display: flex; gap: 6px; }
 .journey-window-dots span { width: 10px; height: 10px; border-radius: 50%; }
 .journey-window-title { font-size: 12px; color: #888; font-weight: 500; }
+.journey-intro {
+  max-width: 640px;
+  margin: -1.5rem auto 2.5rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  text-align: center;
+  color: #777;
+}
+.journey-window-source {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-top: 1px solid #e0e0e0;
+  background: #fefcf6;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #777;
+}
+.journey-window-source a {
+  color: #2B7FD8;
+  text-underline-offset: 3px;
+}
+.journey-window-source a:hover { background: #F4D758; }
+.journey-chat-area:focus-visible {
+  outline: 2px solid #2B7FD8;
+  outline-offset: -2px;
+}
 
 .journey-chat-area {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px;
   display: flex;
@@ -84,8 +117,8 @@
   font-size: 13px;
   line-height: 1.5;
 }
-.jchat--cola { align-self: flex-start; }
-.jchat--cola .jchat-msg { background: #2B7FD8; color: #fff; border-bottom-left-radius: 4px; }
+.jchat--prompt { align-self: flex-start; }
+.jchat--prompt .jchat-msg { background: #2B7FD8; color: #fff; border-bottom-left-radius: 4px; }
 .jchat--me { align-self: flex-end; }
 .jchat--me .jchat-msg { background: #F4D758; color: #1a1a1a; border-bottom-right-radius: 4px; }
 .jchat--me .jchat-name { text-align: right; }
@@ -209,7 +242,7 @@ section { position: relative; }
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: 3px;
-  cursor: default;
+  cursor: pointer;
 }
 .terminal-line .emoji {
   color: #fff;
@@ -361,28 +394,28 @@ section { position: relative; }
   animation: bubblePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   position: relative;
 }
-.chat-bubble--cola {
+.chat-bubble--prompt {
   align-self: flex-start;
   background: #2B7FD8;
   color: #fff;
   border-bottom-left-radius: 6px;
   box-shadow: 0 4px 16px rgba(43,127,216,0.2);
 }
-.chat-bubble--cola .chat-sender {
+.chat-bubble--prompt .chat-sender {
   font-size: 0.7rem;
   font-weight: 600;
   opacity: 0.7;
   margin-bottom: 0.3rem;
   letter-spacing: 0.05em;
 }
-.chat-bubble--esther {
+.chat-bubble--me {
   align-self: flex-end;
   background: #F4D758;
   color: #1a1a1a;
   border-bottom-right-radius: 6px;
   box-shadow: 0 4px 16px rgba(244,215,88,0.25);
 }
-.chat-bubble--esther .chat-sender {
+.chat-bubble--me .chat-sender {
   font-size: 0.7rem;
   font-weight: 600;
   opacity: 0.6;
@@ -976,7 +1009,7 @@ section { position: relative; }
       <div class="terminal-dot terminal-dot--red"></div>
       <div class="terminal-dot terminal-dot--yellow"></div>
       <div class="terminal-dot terminal-dot--green"></div>
-      <div class="terminal-header-title">esther@universe ~ %</div>
+      <div class="terminal-header-title">brclio@studio ~ %</div>
     </div>
     <div class="terminal-body" id="terminalBody">
       <!-- Lines injected by JS typewriter -->
@@ -988,14 +1021,14 @@ section { position: relative; }
   </div>
 </section>
 
-<!-- ==================== JOURNEY — CHAT INTERVIEW ==================== -->
+<!-- ==================== ABOUT — IDEAS IN CONVERSATION ==================== -->
 <section class="journey-section" id="aboutSection">
   <div class="journey-inner">
-    <p class="section-label fade-up">My Journey</p>
-    <h2 class="journey-headline fade-up">从米兰到AI，一条<em>不太直</em>的路</h2>
+    <p class="section-label fade-up">A Conversation</p>
+    <h2 class="journey-headline fade-up">聊聊编程，<em>怎么学、为什么教</em></h2>
+    <p class="journey-intro fade-up">根据我的两篇文章整理的自问自答，聊聊我对学习、教学与创造的想法。</p>
 
     <div class="journey-two-screens fade-up">
-      <!-- 第一屏：建筑时期 -->
       <div class="journey-screen">
         <div class="journey-window">
           <div class="journey-window-bar">
@@ -1004,69 +1037,147 @@ section { position: relative; }
               <span style="background:#ffbd2e;"></span>
               <span style="background:#27c93f;"></span>
             </div>
-            <div class="journey-window-title">二宝 和 不二 的采访 · 建筑时期</div>
+            <div class="journey-window-title">和悦创聊聊 · 怎样真正学会编程</div>
           </div>
-          <div class="journey-chat-area">
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-msg">跟大家讲讲你的经历吧？</div>
+          <div class="journey-chat-area" role="region" aria-label="怎样真正学会编程，共 10 个话题，可上下滚动阅读" tabindex="0">
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">01 · 从学习编程，到教编程</div>
+              <div class="jchat-msg">先认识一下，你平时都在做什么？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">好呀，从大学开始说吧 ☺️</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2015-2019 · 南京 🏛️</div>
-              <div class="jchat-msg">你在南京大学读了四年建筑学本科</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">你好，我是悦创。黄家宝是我的名字，AI悦创、Bornforthis、Brclio，也都是我。写代码、教编程、写文章、做产品，这些事我一直在做。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">是的！四年学会了系统思维和把混乱变成秩序 📐 这个能力我现在还在用</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">2018 年开始软件工程学习，2019 年开始一对一编程教学。越教越发现，很多人缺少的那一环，是把知识连起来、自己解决问题的能力。</div>
             </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2019-2020 · 上海 🏙️</div>
-              <div class="jchat-msg">毕业后去了上海的设计院</div>
-            </div>
-            <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">嗯，在那里确认了——不会继续做建筑设计 ✏️</div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">02 · 学习，是给自己多一种选择</div>
+              <div class="jchat-msg">不打算当程序员，也值得学 Python 吗？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">不过那段时间我开始做自己的设计类自媒体 📱 什么都不懂，但每天一边输入一边输出，是一种很好的学习方式</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-msg">确认不做了，但还是去了米兰？</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">值得。整理资料、处理数据、让重复的工作自动完成，很多专业和工作都会遇到这样的需求。学编程，可以从你自己的问题出发。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">哈哈是的，虽然职业选择不会继续做建筑设计，但不影响我依然热爱这个专业 💕 而且想去米兰体验一下欧洲的生活</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">比如面对一大段需要清理的文本，不熟悉工具时，你可能只能逐个修改。学过之后，脑海里会多一个选项：这件事能不能交给程序？我很看重这种“想得到另一条路”的变化。</div>
             </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2020-2022 · 米兰 🇮🇹</div>
-              <div class="jchat-msg">米兰理工 Architecture & Urban Design</div>
-            </div>
-            <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">意大利彻底治好了我的讨好型人格 🍝 也让我学会了如何独立地解决问题、处理事情，狠狠地成长了一番</div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">03 · 看懂之后，还要连起逻辑</div>
+              <div class="jchat-msg">可我听课能懂，看代码也能懂，为什么自己就是写不出来？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">而且见识到了，原来人还可以这样活的一种感受 ✨</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">这句话我在教学里经常听到。顺着别人已经写好的代码往下读，和面对一个问题自己决定第一步怎么做，是两种不同的过程。</div>
             </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-msg">那真的是很精彩了 🌟</div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">所以我会引导你把问题拆开：需要什么信息？要经过哪些步骤？每一步为什么这样做？让语法接到思路上，才有机会独立写出来。</div>
             </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">04 · 有基础，也要检查连接处</div>
+              <div class="jchat-msg">我以前学过一些，再系统学一遍，之前的时间不就白花了？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">之前的接触会降低重新理解的难度，当然有价值。但熟悉一个词、见过一段代码，也容易让人误以为自己已经掌握。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">真正理解的部分可以快一点通过，同时把笔记整理好；含糊的地方就停下来补。系统学习要做的，是把零散的知识接成一条能走通的路。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">05 · 逻辑 &gt; 笔记 &gt; 语法 &gt; 作业</div>
+              <div class="jchat-msg">那你安排学习时，最看重什么？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我会把逻辑放在最前面，接着是笔记、语法和作业。这个顺序提醒我们，别让做题数量挤掉了理解和整理的时间。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">知道怎么想，忘记语法时还能借助笔记找回来。适合当前阶段的作业，再帮助我们发现哪里没有理解、哪里还需要练。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">06 · 练习，要放在合适的位置</div>
+              <div class="jchat-msg">学生想多做题巩固，你为什么有时反而不急着留作业？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我理解这种心情：想有个明确的任务，确认自己下课后也在进步。但编程知识的交叉性很强，一道看着简单的题，可能已经用到了后面才会学的内容。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">反复做已经会的操作，收获有限；为了完成一道超前的题，又不断打断课程去补后面的语法，学习顺序也会乱。我会看当前学到了哪里，再安排有用的练习。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">07 · 从理解示例，走向自己的小程序</div>
+              <div class="jchat-msg">那课后到底能做些什么？总不能只听吧？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">可以先回到课堂里的示例，看看自己在哪一步开始说不清楚。带着具体的疑问复习，比机械地把同一段代码再抄几遍，更容易发现问题。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">随着知识逐渐完整，再去做适当的练习，想想能用它做个什么小程序。让学过的东西参与解决一个实际问题，慢慢把它变成自己的能力。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">08 · 写下来的过程，也在检查理解</div>
+              <div class="jchat-msg">你为什么这么坚持上课就记笔记？课后看回放补不行吗？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">当场用自己的话整理，我能及时看到你记得对不对、哪里有遗漏。一个地方一直写不清楚，我们就能当场发现，接着讲、接着讨论。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">全部留到课后，要么依靠已经开始模糊的记忆，要么不断暂停回放重听，容易越积越多。我希望把课堂里的理解和记录一起完成，给以后的自己留一份找得到、用得上的笔记。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">09 · 让进度跟着理解走</div>
+              <div class="jchat-msg">家长担心进度慢，你会怎么沟通？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我会先一起看清楚：哪些地方已经会了，哪些地方还说不明白。已经掌握的内容可以提速；需要吸收的部分，就留出理解、表达和整理的时间。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">知识点可以很快讲完，可学生还需要时间把它变成自己的东西。进度要结合具体的人来调整，也欢迎学生直接说出哪里觉得慢，我会一起复盘教学节奏。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">10 · 把卡住的地方带回课堂</div>
+              <div class="jchat-msg">如果我认真学了，还是卡住，甚至答错了呢？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">把你已经想到哪一步、哪里开始不确定说出来，我们才有地方继续往下走。你尝试过的思路，本身就值得拿来讨论。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">给成长留一点时间，也给犯错留一点空间。我希望你学着学着，越来越敢提问、敢表达、敢自己动手解决问题。</div>
+            </div>
+          </div>
+          <div class="journey-window-source">
+            <span>上下滚动继续聊 · 10 个话题</span>
+            <a href="https://bornforthis.cn/column/Python-Programming-Course/P09-FAQ/FAQ03.html" target="_blank" rel="noopener noreferrer">读我的学习 FAQ ↗</a>
           </div>
         </div>
       </div>
 
-      <!-- 第二屏：探索时期 -->
       <div class="journey-screen">
         <div class="journey-window">
           <div class="journey-window-bar">
@@ -1075,90 +1186,130 @@ section { position: relative; }
               <span style="background:#ffbd2e;"></span>
               <span style="background:#27c93f;"></span>
             </div>
-            <div class="journey-window-title">二宝 和 不二 的采访 · 探索时期</div>
+            <div class="journey-window-title">和悦创聊聊 · 教学、写书与 AI</div>
           </div>
-          <div class="journey-chat-area">
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2023 · 回国 🏠</div>
-              <div class="jchat-msg">回国后你做了自己家的住宅装修</div>
+          <div class="journey-chat-area" role="region" aria-label="教学、写书与 AI，共 9 个话题，可上下滚动阅读" tabindex="0">
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">01 · 教学，从自己学明白开始</div>
+              <div class="jchat-msg">你觉得，怎样才算把一门课教好了？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">是的！清包、自己设计、自己面试工人，从头到尾做项目管理，做包工头，做设计师，做甲方 🔨 这是我做过最爽的事情之一</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2023-2024 · 探索 🔍</div>
-              <div class="jchat-msg">然后换了好多方向？互联网的达人运营、白酒、故居策划</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我会先问自己：这个知识，我真的研究明白了吗？我能不能把它怎么来的、为什么这样用，一步步讲给另一个人听？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">一开始是转岗不转行——去做了设计软件的达人运营，依然在设计行业里，之前学的都还用得上</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">学生的疑问也会让我重新审视自己的理解。所以教课对我来说，始终伴随着学习和修正。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">02 · 让不同基础的人都能进入问题</div>
+              <div class="jchat-msg">你在前言里反复说“讲透”，到底怎样才叫透？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">后来慢慢变成了转行不转岗——继续做运营和市场，但换到了白酒行业 🥃 行业变了，但做的事没变</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">初学者听完，能觉得这件事原来可以理解；学过的人再听，也能发现以前没有想通的道理。要做到这一点，老师自己得理解得足够扎实。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">那段时间连自己的自媒体都断更了 😔 确实有比较长的一段迷茫和焦虑的过程</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">比如给小学生讲鸡兔同笼：35 个头、94 条腿，可以先想象兔子都抬起两条前腿。此时一共 70 条着地的腿，多出的 24 条，恰好对应 12 只兔子。先从孩子能理解的常识出发，道理才进得去。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">03 · 把课堂里的积累，带给更多人</div>
+              <div class="jchat-msg">已经在做私教，为什么还花那么多精力写书？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">每一次都以为自己在走弯路，回头看才发现，都是在找同一件事——把混乱变成秩序，然后点亮其他人 ✨</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2024 · GAP 🌊</div>
-              <div class="jchat-msg">那后来怎么又选择 gap 了呢？</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">一对一教学很珍贵，但我的时间和精力有上限。总有人很想学，却暂时没有机会来上课。我想让课堂里反复打磨过的思路，能通过书被更多人接触到。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">实在是很难和认知有问题、或者方向不同的人相处下去 😮‍💨</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">从 2022 年开始图书出版相关合作，到《编程启蒙：思维与代码》的创作，我一直在尝试把教学积累整理成可以反复阅读、循序渐进学习的内容。</div>
             </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2025.3 · AI 🚀</div>
-              <div class="jchat-msg">然后就进入虚实传媒做达人运营了？</div>
-            </div>
-            <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">是的！这是我正式进入 AI 行业 💡 而且非常神奇的是，三个月我就直接做上了运营主管，真的是火箭式的进步 🚀</div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">04 · 思维与代码，两条线一起走</div>
+              <div class="jchat-msg">你想写的，会是一份更详细的 Python 语法清单吗？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">在那里我看到了各种 AI 时代的一人公司是怎么成长的，这个对我影响很大 👀</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-msg">然后你就遇到了我 🫧</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我希望读者先理解编程在做什么，怎样认识和处理一个问题，再进入 Python 的系统学习。写代码的过程，又会反过来训练思维。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">哈哈哈是的 😂</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">章节之间怎样衔接、初学者会在哪一步卡住，都需要细致设计。我会把教学里发现的问题带回书稿里，继续调整表达和学习顺序。</div>
             </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-tag">2025.12 - NOW 🫧</div>
-              <div class="jchat-msg">火星回响，ListenHub & ColaOS</div>
-            </div>
-            <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">Agent Native 时代 🫧 这真的是一个巨大的转变，让我感受到和 Agent 一起工作、一起生活是什么样子</div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">05 · AI 时代，人的思考仍然重要</div>
+              <div class="jchat-msg">可现在 AI 已经会写代码了，你还会推荐人学编程？</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">也让我的边界极大地拓展了，让我成为了更好的人 💪</div>
-            </div>
-            <div class="jchat jchat--cola">
-              <div class="jchat-name">🫧 二宝</div>
-              <div class="jchat-msg">路确实不太直。但每一步都算数 ✨</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">会。因为你仍然需要把需求说清楚，知道自己想解决什么、想得到怎样的结果。工具可以帮忙，但方向和核心想法需要你参与。</div>
             </div>
             <div class="jchat jchat--me">
-              <div class="jchat-name">不二</div>
-              <div class="jchat-msg">谢谢二宝 🫧💜</div>
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">在自己的领域里积累理解，再把 AI 用进真实的问题中，我觉得这样的学习值得投入。只盯着“立刻靠 AI 赚钱”，反而容易被热闹牵着走。</div>
             </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">06 · 保留自己的推理和验证</div>
+              <div class="jchat-msg">那面对 AI 给出的代码，你会怎样提醒学习者？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">先试着理解过程，对程序会得到什么结果形成一个预期，再运行、观察、核对。工具越方便，越要给自己留下主动思考的机会。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">遇到难以凭空推演的中间步骤，也可以输出看看；想研究某个变化的影响，就尽量一次只改变一个因素。把思考和动手验证接起来。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">07 · 把改正的过程也留下来</div>
+              <div class="jchat-msg">学习笔记写错了，整理时直接删掉就好了吧？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我更希望你在错误附近补上正确的理解，并说明自己是在哪里转过弯来的。以后回看，你会知道这个地方为什么容易出错。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">那些曾经不理解、后来弄明白的地方，是自己的学习经历。留住它，笔记才真正属于你。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">08 · 把自己的方法做成可以使用的东西</div>
+              <div class="jchat-msg">你做网站、工具和 Design Skill，也和这些想法有关？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">对。我会把学习与实践整理成文章，也会把想法做成网站、工具和开源项目。Brclio Design System，就是把自己的品牌规范整理成可复用的 Skill。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">做东西时，我也提醒自己先让功能跑通，再逐步优化。让想法落到能使用的东西上，过程中遇到的问题，再带着我继续学习。</div>
+            </div>
+            <div class="jchat jchat--prompt">
+              <div class="jchat-name">💬 你问</div>
+              <div class="jchat-tag">09 · 带着好奇，慢慢把问题弄明白</div>
+              <div class="jchat-msg">如果只能给刚开始学习的人留一句话，你想说什么？</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">多问一步：这件事为什么这样？还能不能换一种方法？把答案想一想、写下来，再去试一试。</div>
+            </div>
+            <div class="jchat jchat--me">
+              <div class="jchat-name">Brclio</div>
+              <div class="jchat-msg">我希望编程带给你创造的乐趣，也让你面对问题时多一点选择。慢慢来，遇到挫折也没关系，愿你一直保有把事情弄明白的好奇心。</div>
+            </div>
+          </div>
+          <div class="journey-window-source">
+            <span>上下滚动继续聊 · 9 个话题</span>
+            <a href="https://bornforthis.cn/column/Python-Programming-Course/Preface.html" target="_blank" rel="noopener noreferrer">读我的前言 ↗</a>
           </div>
         </div>
       </div>
@@ -1166,14 +1317,11 @@ section { position: relative; }
   </div>
 </section>
 
-
-
-
 <!-- ==================== OPINIONS ==================== -->
 <section class="opinions-section">
   <div class="opinion-slide">
     <div class="opinion-number">✦</div>
-    <p class="opinion-text">最会用AI的<br>是最知道自己想要什么的人</p>
+    <p class="opinion-text">先理解问题，再学习代码<br>编程，是一种解决问题的能力</p>
     <span class="opinion-deco">— what I believe</span>
   </div>
 </section>
@@ -1182,27 +1330,27 @@ section { position: relative; }
 <section class="projects">
   <div class="projects-inner">
     <p class="section-label fade-up">What I Do</p>
-    <h2 class="projects-headline fade-up">两件正在做的事</h2>
+    <h2 class="projects-headline fade-up">教人创造，也亲手创造</h2>
     <div class="project-grid">
       <div class="project-card project-card--1 fade-up" data-tilt>
-        <div class="project-card-bg-text">AI</div>
+        <div class="project-card-bg-text">PY</div>
         <div class="project-card-content">
           <div class="project-card-emoji">✦</div>
-          <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank" style="text-decoration:none;color:inherit;display:block;">
-          <h3 class="project-card-title">AI 内容创作者</h3>
-          <p class="project-card-desc">在小红书分享AI时代的真实体验。不是教程博主，是一个用AI认真生活的人，记录过程中的发现、困惑和方法论。</p>
-          <span class="project-card-tag">小红书 · 点击访问 →</span>
+          <a href="https://pythontutor.bornforthis.cn" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:block;">
+          <h3 class="project-card-title">Python 一对一教学</h3>
+          <p class="project-card-desc">从 2019 年开始，陪伴不同基础的学习者理解编程。围绕编程思维、基础知识与项目实践，找到适合自己的学习路径。</p>
+          <span class="project-card-tag">Python 教学 · 点击了解 →</span>
           </a>
         </div>
       </div>
       <div class="project-card project-card--2 fade-up fade-up-delay-1" data-tilt>
-        <div class="project-card-bg-text">OS</div>
+        <div class="project-card-bg-text">DS</div>
         <div class="project-card-content">
           <div class="project-card-emoji">◈</div>
-          <a href="https://colaos.ai" target="_blank" style="text-decoration:none;color:inherit;display:block;">
-          <h3 class="project-card-title">ColaOS</h3>
-          <p class="project-card-desc">The First OS With Soul. 不是又一个聊天框——是能看、能听、能做事、能长记忆的AI伙伴 🫧</p>
-          <span class="project-card-tag">ColaOS · 点击访问 →</span>
+          <a href="https://github.com/Brclio/brclio-design-system" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;display:block;">
+          <h3 class="project-card-title">Brclio Design System</h3>
+          <p class="project-card-desc">把个人品牌的配色、字体、组件与排版规范整理成 Design Skill，让网页、教程与图文创作保持自己的风格。</p>
+          <span class="project-card-tag">开源 Design Skill · 查看项目 →</span>
           </a>
         </div>
       </div>
@@ -1214,38 +1362,38 @@ section { position: relative; }
 <section class="works">
   <div class="works-top">
     <p class="section-label fade-up">Collections</p>
-    <h2 class="works-headline fade-up">内容合集</h2>
+    <h2 class="works-headline fade-up">学习、记录与作品</h2>
   </div>
   <div class="works-track">
-    <a href="https://www.xiaohongshu.com/collection/item/6997bd92007c000000000001?xhsshare=&appuid=55c6c7695894460904f87b47&apptime=1775544223&share_id=65e4e128bf854d31bd742a171404c2b3&share_channel=copy_link" target="_blank" class="work-card" style="text-decoration:none;">
-      <div class="work-card-number">🤖</div>
-      <div class="work-card-unit"></div>
-      <div class="work-card-title">我和Agent的日常</div>
-      <div class="work-card-platform">跟 Agent 协作的日常</div>
+    <a href="https://bornforthis.cn" target="_blank" rel="noopener noreferrer" class="work-card" style="text-decoration:none;">
+      <div class="work-card-number">🐍</div>
+      <div class="work-card-unit">LEARN</div>
+      <div class="work-card-title">编程学习与笔记</div>
+      <div class="work-card-platform">AI悦创 · Bornforthis</div>
     </a>
-    <a href="https://www.xiaohongshu.com/collection/item/698bdf480054000000000001?xhsshare=&appuid=55c6c7695894460904f87b47&apptime=1775544203&share_id=4656d403d6a6472b8c05bf23114d9a6f&share_channel=copy_link" target="_blank" class="work-card" style="text-decoration:none;">
-      <div class="work-card-number">🥰</div>
-      <div class="work-card-unit"></div>
-      <div class="work-card-title">Girls!</div>
-      <div class="work-card-platform">女性议题</div>
+    <a href="https://blog.bornforthis.cn" target="_blank" rel="noopener noreferrer" class="work-card" style="text-decoration:none;">
+      <div class="work-card-number">✍️</div>
+      <div class="work-card-unit">WRITE</div>
+      <div class="work-card-title">技术写作与实践</div>
+      <div class="work-card-platform">文章 · 工具 · 学习记录</div>
     </a>
-    <a href="https://www.xiaohongshu.com/collection/item/68f49c1a00b7000000000001?xhsshare=&appuid=55c6c7695894460904f87b47&apptime=1775544173&share_id=07574f1a82be48578bb54597c23d167b&share_channel=copy_link" target="_blank" class="work-card" style="text-decoration:none;">
-      <div class="work-card-number">🏛️</div>
-      <div class="work-card-unit"></div>
-      <div class="work-card-title">建筑→AI</div>
-      <div class="work-card-platform">转行故事系列</div>
-    </a>
-    <a href="https://www.xiaohongshu.com/collection/item/68f49b4700b1000000000001?xhsshare=&appuid=55c6c7695894460904f87b47&apptime=1775544188&share_id=4cc720f057294ceea131953507a7f0b3&share_channel=copy_link" target="_blank" class="work-card" style="text-decoration:none;">
+    <a href="https://github.com/Brclio" target="_blank" rel="noopener noreferrer" class="work-card" style="text-decoration:none;">
       <div class="work-card-number">🔧</div>
-      <div class="work-card-unit"></div>
-      <div class="work-card-title">日常好用AI</div>
-      <div class="work-card-platform">工具推荐 · 教程</div>
+      <div class="work-card-unit">BUILD</div>
+      <div class="work-card-title">开源与独立开发</div>
+      <div class="work-card-platform">GitHub @Brclio · 项目与代码</div>
     </a>
-    <a href="https://www.xiaohongshu.com/collection/item/69d3a7c901fd000000000001?xhsshare=&appuid=55c6c7695894460904f87b47&apptime=1775544150&share_id=ac775ccaa37f4600bc0909f67d974fa4&share_channel=copy_link" target="_blank" class="work-card" style="text-decoration:none;">
-      <div class="work-card-number">❓</div>
-      <div class="work-card-unit"></div>
-      <div class="work-card-title">认真想想</div>
-      <div class="work-card-platform">AI 时代的真问题</div>
+    <a href="https://brclio-design-demos.brclio.com/" target="_blank" rel="noopener noreferrer" class="work-card" style="text-decoration:none;">
+      <div class="work-card-number">🎨</div>
+      <div class="work-card-unit">DESIGN</div>
+      <div class="work-card-title">Brclio 设计实验</div>
+      <div class="work-card-platform">设计系统 · 页面与组件演示</div>
+    </a>
+    <a href="https://space.bilibili.com/405961705" target="_blank" rel="noopener noreferrer" class="work-card" style="text-decoration:none;">
+      <div class="work-card-number">🎬</div>
+      <div class="work-card-unit">SHARE</div>
+      <div class="work-card-title">编程视频与分享</div>
+      <div class="work-card-platform">哔哩哔哩 · 学习与教学</div>
     </a>
   </div>
 </section>
@@ -1253,18 +1401,22 @@ section { position: relative; }
 <!-- ==================== CONTACT ==================== -->
 <section class="contact">
   <div class="contact-inner">
-    <h2 class="contact-headline fade-up">Say Hi</h2>
-    <p class="contact-sub fade-up">I don't bite — my AI might though.</p>
+    <h2 class="contact-headline fade-up">认识一下，我是 Brclio</h2>
+    <p class="contact-sub fade-up">Learn. Build. Teach. Share.</p>
     <div class="contact-links fade-up">
-      <a href="mailto:aiyuechuang@gmail.com" class="contact-link">📮 邮箱</a>
-      <a href="https://xhslink.cn/o/59VwcmP2rEz" target="_blank" rel="noopener" class="contact-link">📕 小红书 @ESTHER不二</a>
+      <a href="mailto:aiyuechuang@gmail.com" class="contact-link">📮 aiyuechuang@gmail.com</a>
+      <a href="https://www.xiaohongshu.com/user/profile/5e413a430000000001000f4c" target="_blank" rel="noopener noreferrer" class="contact-link">📕 小红书 @Brclio</a>
+      <a href="https://github.com/Brclio" target="_blank" rel="noopener noreferrer" class="contact-link">💻 GitHub @Brclio</a>
+      <a href="https://x.com/huangjiarongbao" target="_blank" rel="noopener noreferrer" class="contact-link">✦ X @huangjiarongbao</a>
+      <a href="https://space.bilibili.com/405961705" target="_blank" rel="noopener noreferrer" class="contact-link">🎬 哔哩哔哩</a>
+      <a href="https://bornforthis.cn" target="_blank" rel="noopener noreferrer" class="contact-link">🌐 Bornforthis</a>
     </div>
-    <p class="contact-quote fade-up">"找到你喜欢的事，然后让它杀死你。"<br>— Charles Bukowski（大概是这个意思）</p>
+    <p class="contact-quote fade-up">程序员｜编程教育者｜作者｜独立开发者<br>写代码、教编程、做产品<br>Stay curious. Keep building.</p>
   </div>
 </section>
 
 <footer class="footer">
-  <p>© 2026 ESTHER不二 · Built with AI & attitude</p>
+  <p>© 2026 Brclio · 黄家宝 / AI悦创 / Bornforthis · Learn. Build. Teach. Share.</p>
 </footer>
 
 <script>
@@ -1275,15 +1427,15 @@ section { position: relative; }
   // Define terminal lines: { type: 'cmd'|'output'|'blank', text, html }
   const lines = [
     { type: 'cmd',    text: '$ whoami' },
-    { type: 'output', html: '<span class="output">ESTHER不二</span>' },
+    { type: 'output', html: '<span class="output">Brclio · 黄家宝</span>' },
     { type: 'blank' },
     { type: 'cmd',    text: '$ cat about.md' },
-    { type: 'output', html: '<span class="output">在AI时代认真生活的女生｜INTJ</span>' },
-    { type: 'output', html: '<span class="output">跟Agent搭档的第1年</span>' },
-    { type: 'output', html: '<span class="output">南大/米理建筑→AI ColaOS building</span>' },
-    { type: 'output', html: '<span class="link">💕 关于[她]在AI时代</span>' },
+    { type: 'output', html: '<span class="output">程序员｜编程教育者｜作者｜独立开发者</span>' },
+    { type: 'output', html: '<span class="output">写代码，教编程，做产品</span>' },
+    { type: 'output', html: '<span class="output">AI悦创 / Bornforthis / Brclio</span>' },
+    { type: 'output', html: '<a class="link" href="#aboutSection">↳ 认识 Brclio：学习、教学与创造</a>' },
     { type: 'blank' },
-    { type: 'cmd',    text: '$ echo "1 person + AI = 1 team"' },
+    { type: 'cmd',    text: '$ echo "Learn. Build. Teach. Share."' },
     { type: 'output', html: '<span class="highlight">✨</span>' },
   ];
 
